@@ -208,7 +208,7 @@ app.post("/validpathchecker", authenticator, async function (req, res) {
 });
 app.post("/posts", authenticator, async function (req, res) {
   const communityId = req.body.communityId;
-  const posts = await PostModel.find({ communityId: communityId });
+  const posts = await PostModel.find({ communityId: communityId }).populate("userid","username");
   if (posts) {
     res.json({
         isThereAnyPost:true,

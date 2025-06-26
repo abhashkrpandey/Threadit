@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import PostComponent from "./PostComponent";
 export default function SubThreaditContentBody() {
   const SubThreaditDetails = useSelector(
     (state) => state.activity.currentActivity.SubThreaditDetails
@@ -28,13 +29,17 @@ export default function SubThreaditContentBody() {
       <div>No Posts Yet</div>
     ):(
           postArray.map((ele)=>(
-            <div key={ele._id.toString()}>
-              <div className="text-xl">
-            Title:{ele.posttitle}
-              </div>
-            {ele.postbody}
-            </div>
+            // <div key={ele._id.toString()}>
+            //   <div className="text-xl">
+            // Title:{ele.posttitle}
+            //   </div>
+            // {ele.postbody}
+            // </div>
+            <PostComponent key={ele._id.toString()} title={ele.posttitle} 
+             postbody={ele.postbody} upvote={ele.upvote} downvote={ele.downvote} 
+             bookmarked={ele.bookmarked} username={ele.userid.username}></PostComponent>
           ))
+
     )}
   </div>
   </>;
