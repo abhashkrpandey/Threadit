@@ -208,16 +208,182 @@ app.post("/validpathchecker", authenticator, async function (req, res) {
 });
 app.post("/posts", authenticator, async function (req, res) {
   const communityId = req.body.communityId;
-  const posts = await PostModel.find({ communityId: communityId }).populate("userid","username");
+  const userid = req.decoded.userid;
+  const posts = await PostModel.find(
+    { communityId: communityId },
+    { postbody: 0 }
+  ).populate("userid", "username");
   if (posts) {
+    const modifiedposts = posts.map((ele) => {
+      let obj = ele.toObject();
+      const hasLiked = obj.upvoterId.some((id) => id.equals(userid));
+      const hasdisLiked = obj.downvoterId.some((id) => id.equals(userid));
+      const hasbookmarked = obj.bookmarkerId.some((id) => id.equals(userid));
+
+      delete obj.upvoterId;
+      delete obj.downvoterId;
+      delete obj.bookmarkerId;
+
+      obj.hasLiked = hasLiked;
+      obj.hasdisLiked = hasdisLiked;
+      obj.hasbookmarked = hasbookmarked;
+      return obj;
+    });
     res.json({
-        isThereAnyPost:true,
-        posts:posts
-    })
+      isThereAnyPost: true,
+      posts: modifiedposts,
+    });
   } else {
     res.json({
-        isThereAnyPost:false
-    })
+      isThereAnyPost: false,
+    });
+  }
+});
+app.post("/likepost", authenticator, async function (req, res) {
+  const userid = new mongoose.Types.ObjectId(req.decoded.userid);
+  const postid = new mongoose.Types.ObjectId(req.body.postid);
+  let toggle = false;
+  const post = await PostModel.findOne(
+    { _id: postid },
+    { _id: 0, upvoterId: 1, downvoterId: 1 }
+  );
+  if (post.downvoterId.some((id) => id.equals(userid))) {
+    await PostModel.updateOne(
+      { _id: postid },
+      { $inc: { downvote: -1 }, $pull: { downvoterId: userid } }
+    );
+    toggle = true;
+  }
+  if (post.upvoterId.some((id) => id.equals(userid))) {
+    res.json({
+      likeCounted: false,
+      message: "Already liked",
+    });
+  } else {
+    try {
+      await PostModel.updateOne(
+        { _id: postid },
+        { $inc: { upvote: 1 }, $push: { upvoterId: userid } }
+      );
+      res.json({
+        likeCounted: true,
+        message: "like counted",
+        toggle: toggle,
+      });
+    } catch (err) {
+      res.json({
+        likeCounted: false,
+        message: "some error",
+      });
+    }
+  }
+});
+app.post("/dislikepost", authenticator, async function (req, res) {
+  const userid = new mongoose.Types.ObjectId(req.decoded.userid);
+  const postid = new mongoose.Types.ObjectId(req.body.postid);
+  let toggle = false;
+  const post = await PostModel.findOne(
+    { _id: postid },
+    { _id: 0, upvoterId: 1, downvoterId: 1 }
+  );
+  if (post.upvoterId.some((id) => id.equals(userid))) {
+    await PostModel.updateOne(
+      { _id: postid },
+      { $inc: { upvote: -1 }, $pull: { upvoterId: userid } }
+    );
+    toggle = true;
+  }
+  console.log(post);
+  if (post.downvoterId.some((id) => id.equals(userid))) {
+    res.json({
+      dislikeCounted: false,
+      message: "Already disliked",
+    });
+  } else {
+    try {
+      const update = await PostModel.updateOne(
+        { _id: postid },
+        { $inc: { downvote: 1 }, $push: { downvoterId: userid } }
+      );
+      res.json({
+        dislikeCounted: true,
+        message: "dislike counted",
+        toggle: toggle,
+      });
+    } catch (err) {
+      res.json({
+        dislikeCounted: false,
+        message: "some error",
+      });
+    }
+  }
+});
+app.post("/bookmarkpost", authenticator, async function (req, res) {
+  const userid = new mongoose.Types.ObjectId(req.decoded.userid);
+  const postid = new mongoose.Types.ObjectId(req.body.postid);
+  const post = await PostModel.findOne(
+    { _id: postid },
+    { _id: 0, bookmarkerId: 1 }
+  );
+  console.log(post);
+  if (post.bookmarkerId.some((id) => id.equals(userid))) {
+    const update = await PostModel.updateOne(
+      { _id: postid },
+      { $inc: { bookmarked: -1 }, $pull: { bookmarkerId: userid } }
+    );
+    res.json({
+      isbookmarked: false,
+      message: "bookmarked removed",
+    });
+  } else {
+    try {
+      const update = await PostModel.updateOne(
+        { _id: postid },
+        { $inc: { bookmarked: 1 }, $push: { bookmarkerId: userid } }
+      );
+      res.json({
+        isbookmarked: true,
+        message: "bookmarked counted",
+      });
+    } catch (err) {
+      res.json({
+        bookmarkCounted: false,
+        message: "some error",
+      });
+    }
+  }
+});
+
+app.post("/validpost", authenticator, async function (req, res) {
+  const postid = new mongoose.Types.ObjectId(req.body.postid);
+  const userid = req.decoded.userid;
+  try {
+    const post = await PostModel.findOne({ _id: postid })
+      .populate("userid", "username")
+      .populate("communityId", "subname");
+
+    const modifiedPostObject = post.toObject();
+    const hasLiked = modifiedPostObject.upvoterId.some((id) =>
+      id.equals(userid)
+    );
+    const hasdisLiked = modifiedPostObject.downvoterId.some((id) =>
+      id.equals(userid)
+    );
+    const hasbookmarked = modifiedPostObject.bookmarkerId.some((id) =>
+      id.equals(userid)
+    );
+
+    delete modifiedPostObject.upvoterId;
+    delete modifiedPostObject.downvoterId;
+    delete modifiedPostObject.bookmarkerId;
+
+    modifiedPostObject.hasLiked = hasLiked;
+    modifiedPostObject.hasdisLiked = hasdisLiked;
+    modifiedPostObject.hasbookmarked = hasbookmarked;
+
+    res.json({ post: modifiedPostObject, isValidPost: true });
+  } catch (err) {
+    res.json({ isValidPost: false });
   }
 });
 app.listen(process.env.BACKEND_PORT, () => {

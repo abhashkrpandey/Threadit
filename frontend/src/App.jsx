@@ -13,6 +13,7 @@ import CreatePost from "./pages/CreatePost";
 import { updateUserInfo } from "./reducers/loginSlice";
 import CreateSubThreadit from "./pages/CreateSubThreadit";
 import SubThreadit from "./pages/SubThreadit";
+import PostPage from "./components/PostPage";
 
 export default function App() {
   axios.defaults.withCredentials = true;
@@ -36,11 +37,9 @@ export default function App() {
       <Route path="/demouser" element={<DemoUser></DemoUser>}></Route>
       <Route path="/create" element={<CreatePost></CreatePost>}></Route>
       <Route path="/inside" element={<Inside></Inside>}></Route>
-      <Route
-        path="/createsub"
-        element={<CreateSubThreadit></CreateSubThreadit>}
-      ></Route>
+      <Route path="/createsub" element={<CreateSubThreadit></CreateSubThreadit>}></Route>
       <Route path="/t/:subname" element={<SubThreadit></SubThreadit>}></Route>
+      <Route path="/post/:postid" element={<PostPage></PostPage>}></Route>
     </Routes>
   );
 }

@@ -29,15 +29,7 @@ export default function SubThreaditContentBody() {
       <div>No Posts Yet</div>
     ):(
           postArray.map((ele)=>(
-            // <div key={ele._id.toString()}>
-            //   <div className="text-xl">
-            // Title:{ele.posttitle}
-            //   </div>
-            // {ele.postbody}
-            // </div>
-            <PostComponent key={ele._id.toString()} title={ele.posttitle} 
-             postbody={ele.postbody} upvote={ele.upvote} downvote={ele.downvote} 
-             bookmarked={ele.bookmarked} username={ele.userid.username}></PostComponent>
+            <PostComponent key={ele._id.toString()} props={ele} ></PostComponent>
           ))
 
     )}
