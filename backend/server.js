@@ -10,6 +10,7 @@ const PostModel = require("./database/PostModel");
 const DraftModel = require("./database/DraftModel");
 const SubRedditModel = require("./database/SubRedditModel");
 const { default: mongoose } = require("mongoose");
+const CommentModel = require("./database/CommentModel");
 
 const app = express();
 dotenv.config();
@@ -239,82 +240,163 @@ app.post("/posts", authenticator, async function (req, res) {
     });
   }
 });
-app.post("/likepost", authenticator, async function (req, res) {
+app.post("/like", authenticator, async function (req, res) {
   const userid = new mongoose.Types.ObjectId(req.decoded.userid);
   const postid = new mongoose.Types.ObjectId(req.body.postid);
-  let toggle = false;
-  const post = await PostModel.findOne(
-    { _id: postid },
-    { _id: 0, upvoterId: 1, downvoterId: 1 }
-  );
-  if (post.downvoterId.some((id) => id.equals(userid))) {
-    await PostModel.updateOne(
-      { _id: postid },
-      { $inc: { downvote: -1 }, $pull: { downvoterId: userid } }
+  const commentID = req.body.commentid;
+  if (commentID != null) {
+    const commentid = new mongoose.Types.ObjectId(commentID);
+    let toggle = false;
+    const post = await CommentModel.findOne(
+      { _id: commentid },
+      { _id: 0, upvoterId: 1, downvoterId: 1 }
     );
-    toggle = true;
-  }
-  if (post.upvoterId.some((id) => id.equals(userid))) {
-    res.json({
-      likeCounted: false,
-      message: "Already liked",
-    });
-  } else {
-    try {
-      await PostModel.updateOne(
-        { _id: postid },
-        { $inc: { upvote: 1 }, $push: { upvoterId: userid } }
+    if (post.downvoterId.some((id) => id.equals(userid))) {
+      await CommentModel.updateOne(
+        { _id: commentid },
+        { $inc: { downvote: -1 }, $pull: { downvoterId: userid } }
       );
-      res.json({
-        likeCounted: true,
-        message: "like counted",
-        toggle: toggle,
-      });
-    } catch (err) {
+      toggle = true;
+    }
+    if (post.upvoterId.some((id) => id.equals(userid))) {
       res.json({
         likeCounted: false,
-        message: "some error",
+        message: "Already liked",
       });
+    } else {
+      try {
+        await CommentModel.updateOne(
+          { _id: commentid },
+          { $inc: { upvote: 1 }, $push: { upvoterId: userid } }
+        );
+        res.json({
+          likeCounted: true,
+          message: "like counted",
+          toggle: toggle,
+        });
+      } catch (err) {
+        res.json({
+          likeCounted: false,
+          message: "some error",
+        });
+      }
+    }
+  } else {
+    let toggle = false;
+    const post = await PostModel.findOne(
+      { _id: postid },
+      { _id: 0, upvoterId: 1, downvoterId: 1 }
+    );
+    if (post.downvoterId.some((id) => id.equals(userid))) {
+      await PostModel.updateOne(
+        { _id: postid },
+        { $inc: { downvote: -1 }, $pull: { downvoterId: userid } }
+      );
+      toggle = true;
+    }
+    if (post.upvoterId.some((id) => id.equals(userid))) {
+      res.json({
+        likeCounted: false,
+        message: "Already liked",
+      });
+    } else {
+      try {
+        await PostModel.updateOne(
+          { _id: postid },
+          { $inc: { upvote: 1 }, $push: { upvoterId: userid } }
+        );
+        res.json({
+          likeCounted: true,
+          message: "like counted",
+          toggle: toggle,
+        });
+      } catch (err) {
+        res.json({
+          likeCounted: false,
+          message: "some error",
+        });
+      }
     }
   }
 });
-app.post("/dislikepost", authenticator, async function (req, res) {
+app.post("/dislike", authenticator, async function (req, res) {
   const userid = new mongoose.Types.ObjectId(req.decoded.userid);
   const postid = new mongoose.Types.ObjectId(req.body.postid);
-  let toggle = false;
-  const post = await PostModel.findOne(
-    { _id: postid },
-    { _id: 0, upvoterId: 1, downvoterId: 1 }
-  );
-  if (post.upvoterId.some((id) => id.equals(userid))) {
-    await PostModel.updateOne(
-      { _id: postid },
-      { $inc: { upvote: -1 }, $pull: { upvoterId: userid } }
+  const commentID = req.body.commentid;
+  if (commentID != null) {
+    const commentid = new mongoose.Types.ObjectId(commentID);
+    let toggle = false;
+    const post = await CommentModel.findOne(
+      { _id: commentid },
+      { _id: 0, upvoterId: 1, downvoterId: 1 }
     );
-    toggle = true;
-  }
-  console.log(post);
-  if (post.downvoterId.some((id) => id.equals(userid))) {
-    res.json({
-      dislikeCounted: false,
-      message: "Already disliked",
-    });
-  } else {
-    try {
-      const update = await PostModel.updateOne(
-        { _id: postid },
-        { $inc: { downvote: 1 }, $push: { downvoterId: userid } }
+    if (post.upvoterId.some((id) => id.equals(userid))) {
+      await CommentModel.updateOne(
+        { _id: commentid },
+        { $inc: { upvote: -1 }, $pull: { upvoterId: userid } }
       );
-      res.json({
-        dislikeCounted: true,
-        message: "dislike counted",
-        toggle: toggle,
-      });
-    } catch (err) {
+      toggle = true;
+    }
+    console.log(post);
+    if (post.downvoterId.some((id) => id.equals(userid))) {
       res.json({
         dislikeCounted: false,
-        message: "some error",
+        message: "Already disliked",
       });
+    } else {
+      try {
+        const update = await CommentModel.updateOne(
+          { _id: commentid },
+          { $inc: { downvote: 1 }, $push: { downvoterId: userid } }
+        );
+        res.json({
+          dislikeCounted: true,
+          message: "dislike counted",
+          toggle: toggle,
+        });
+      } catch (err) {
+        res.json({
+          dislikeCounted: false,
+          message: "some error",
+        });
+      }
+    }
+  } else {
+    let toggle = false;
+    const post = await PostModel.findOne(
+      { _id: postid },
+      { _id: 0, upvoterId: 1, downvoterId: 1 }
+    );
+    if (post.upvoterId.some((id) => id.equals(userid))) {
+      await PostModel.updateOne(
+        { _id: postid },
+        { $inc: { upvote: -1 }, $pull: { upvoterId: userid } }
+      );
+      toggle = true;
+    }
+    console.log(post);
+    if (post.downvoterId.some((id) => id.equals(userid))) {
+      res.json({
+        dislikeCounted: false,
+        message: "Already disliked",
+      });
+    } else {
+      try {
+        const update = await PostModel.updateOne(
+          { _id: postid },
+          { $inc: { downvote: 1 }, $push: { downvoterId: userid } }
+        );
+        res.json({
+          dislikeCounted: true,
+          message: "dislike counted",
+          toggle: toggle,
+        });
+      } catch (err) {
+        res.json({
+          dislikeCounted: false,
+          message: "some error",
+        });
+      }
     }
   }
 });
@@ -386,6 +468,104 @@ app.post("/validpost", authenticator, async function (req, res) {
     res.json({ isValidPost: false });
   }
 });
+
+app.post("/addcomment", authenticator, async function (req, res) {
+  const userid = new mongoose.Types.ObjectId(req.decoded.userid);
+  const postid = new mongoose.Types.ObjectId(req.body.postid);
+  const parentID = req.body.parentid;
+  const comment = req.body.comment;
+  let depth = 0;
+  let parentid;
+  // console.log(userid, postid, parentID);
+  if (parentID != null) {
+    parentid=new mongoose.Types.ObjectId(parentID)
+    const depthObject = await CommentModel.findOne(
+      { postId: postid, _id: parentid },
+      { _id: 0, depth: 1 }
+    );
+    // console.log(depthObject);
+    depth = depthObject.depth + 1;
+  }
+  const commentAdded = await CommentModel.create({
+    userid: userid,
+    postId: postid,
+    parentId: parentid,
+    commentText: comment,
+    depth: depth,
+  });
+  console.log(commentAdded);
+  res.json({
+    isCommentAdded: true,
+    commentText: commentAdded.commentText,
+    createdAt: commentAdded.createdAt,
+    updatedAt: commentAdded.updatedAt,
+  });
+});
+
+app.post("/fetchcomments", authenticator, async function (req, res) {
+  const postid = req.body.postid;
+  const userid = req.decoded.userid;
+  try {
+    const commentsArray = await CommentModel.find({
+      postId: postid,
+      parentId: null,
+    }).populate("userid", "username");
+    let modifiedcommentsArray = commentsArray.map((ele) => {
+      let obj = ele.toObject();
+      const hasLiked = obj.upvoterId.some((id) => id.equals(userid));
+      const hasdisLiked = obj.downvoterId.some((id) => id.equals(userid));
+
+      delete obj.downvoterId;
+      delete obj.upvoterId;
+
+      obj.hasLiked = hasLiked;
+      obj.hasdisLiked = hasdisLiked;
+      return obj;
+    });
+    res.json({
+      hasFetched: true,
+      commentsArray: modifiedcommentsArray,
+    });
+  } catch (err) {
+    res.json({
+      hasFetched: false,
+    });
+  }
+});
+
+app.post("/fetchreply", authenticator, async function (req, res) {
+  const postid = req.body.postid;
+  const parentid = req.body.parentid;
+  const userid = req.decoded.userid;
+  try {
+    const commentsArray = await CommentModel.find({
+      postId: postid,
+      parentId: parentid,
+    }).populate("userid", "username");
+    let modifiedcommentsArray = commentsArray.map((ele) => {
+      let obj = ele.toObject();
+      const hasLiked = obj.upvoterId.some((id) => id.equals(userid));
+      const hasdisLiked = obj.downvoterId.some((id) => id.equals(userid));
+
+      delete obj.downvoterId;
+      delete obj.upvoterId;
+
+      obj.hasLiked = hasLiked;
+      obj.hasdisLiked = hasdisLiked;
+      return obj;
+    });
+    res.json({
+      hasFetched: true,
+      commentsArray: modifiedcommentsArray,
+    });
+  } catch (err) {
+    res.json({
+      hasFetched: false,
+      commentsArray: modifiedcommentsArray,
+    });
+  }
+});
+
 app.listen(process.env.BACKEND_PORT, () => {
   console.log(`server running at ${process.env.BACKEND_PORT}`);
 });

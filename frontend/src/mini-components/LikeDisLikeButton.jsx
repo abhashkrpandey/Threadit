@@ -13,9 +13,10 @@ export default function LikeDisLikeButton(props) {
   async function likeFunc(event) {
     event.stopPropagation();
     const response = await axios.post(
-      import.meta.env.VITE_BACKEND_URL + "/likepost",
+      import.meta.env.VITE_BACKEND_URL + "/like",
       {
         postid: props.postid,
+        commentid:props.commentid
       }
     );
     console.log(response.data.toogle);
@@ -37,9 +38,10 @@ export default function LikeDisLikeButton(props) {
   async function dislikeFunc(event) {
     event.stopPropagation();
     const response = await axios.post(
-      import.meta.env.VITE_BACKEND_URL + "/dislikepost",
+      import.meta.env.VITE_BACKEND_URL + "/dislike",
       {
         postid: props.postid,
+        commentid:props.commentid
       }
     );
     if (response.data.dislikeCounted && response.data.toggle == false) {

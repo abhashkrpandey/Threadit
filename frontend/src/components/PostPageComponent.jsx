@@ -42,7 +42,7 @@ export default function PostPageComponent(props) {
         </div>
         {isOpen ? (
             <div>
-              <CommentDiv />
+              <CommentDiv postid={props.post._id} />
             </div>
           ) : (
             <div></div>
