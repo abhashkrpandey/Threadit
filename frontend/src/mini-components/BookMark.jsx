@@ -16,7 +16,7 @@ export default function BookMark({ bookmarkCount, hasbookmarked, postid }) {
     if (response.data.isbookmarked) {
       setbookmarkLive(bookmarkLive + 1);
       sethasBookmarked(true);
-    } else {
+    } else if(response.data.isbookmarked===false) {
       setbookmarkLive(bookmarkLive - 1);
       sethasBookmarked(false);
     }

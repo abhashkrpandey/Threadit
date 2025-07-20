@@ -3,13 +3,28 @@ import DateTime from "../mini-components/DateTime";
 import LikeDisLikeButton from "../mini-components/LikeDisLikeButton";
 import comment from "../assets/comment.svg";
 import CommentDiv from "../mini-components/CommentDiv";
-import { useState } from "react";
+import socket from "../socket.js";
+import { useEffect, useState } from "react";
 export default function PostPageComponent(props) {
   const [isOpen, setisOpen] = useState(false);
   function openComment() {
     if (isOpen === false) setisOpen(true);
     else setisOpen(false);
   }
+  useEffect(() => {
+    if (isOpen === true) {
+      socket.emit("joinRoomOfComment", {
+        room: props.post._id,
+      });
+      // console.log("mount");
+    }
+    return () => {
+      socket.emit("leaveRoomOfComment", {
+        room: props.post._id,
+      });
+      // console.log("unmount");
+    };
+  }, [isOpen, props.post._id]);
   return (
     <div className="flex flex-col">
       <div className="flex flex-row">
@@ -39,14 +54,14 @@ export default function PostPageComponent(props) {
             <img src={comment} width={16} height={16}></img>
           </button>
         </div>
+      </div>
+      {isOpen ? (
+        <div>
+          <CommentDiv postid={props.post._id} />
         </div>
-        {isOpen ? (
-            <div>
-              <CommentDiv postid={props.post._id} />
-            </div>
-          ) : (
-            <div></div>
-          )}
+      ) : (
+        <div></div>
+      )}
     </div>
   );
 }

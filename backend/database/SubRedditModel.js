@@ -7,7 +7,8 @@ const SubRedditSchema = new mongoose.Schema({
     accessiblity: { type: String, required: true },
     topics: { type: [String], required: true },
     creatorId: { type:ObjectId ,ref:"users", required: true },
-    membersCount: { type: Number, default: 1 }
+    membersCount: { type: Number, default: 1 },
+    postCount:{type:Number,default:0}
 }, { timestamps: true });
 
 const SubRedditModel =  mongoose.model("subreddits", SubRedditSchema);

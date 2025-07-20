@@ -11,7 +11,7 @@ export default function MyJoinedCommunityList() {
         import.meta.env.VITE_BACKEND_URL + "/mycommunitylist"
       );
       if (response.data.isPresent) {
-        setCommunityList(response.data.communityList);
+        setCommunityList(response.data.communityList.communitiesjoined);
       }
     }
     listCollector();

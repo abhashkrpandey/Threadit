@@ -10,8 +10,8 @@ const CommentSchema = new mongoose.Schema(
     depth: { type: Number, default: 0 },
     upvote: { type: Number, default: 0 },
     downvote: { type: Number, default: 0 },
-    upvoterId: { type: [ObjectId], ref: "users", required: true },
-    downvoterId: { type: [ObjectId], ref: "users", required: true },
+    upvoterId: [{type:ObjectId,ref: "users"}],
+    downvoterId: [{type:ObjectId,ref: "users"}],
   },
   { timestamps: true }
 );
@@ -25,5 +25,6 @@ CommentSchema.virtual("replies", {
 CommentSchema.set("toObject", { virtuals: true });
 CommentSchema.set("toJSON", { virtuals: true });
 
+CommentSchema.index()
 const CommentModel = mongoose.model("comment", CommentSchema);
 module.exports = CommentModel;

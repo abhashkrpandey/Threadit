@@ -9,6 +9,8 @@ const UserModel = require("./database/UserModel");
 const PostModel = require("./database/PostModel");
 const DraftModel = require("./database/DraftModel");
 const SubRedditModel = require("./database/SubRedditModel");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 const { default: mongoose } = require("mongoose");
 const CommentModel = require("./database/CommentModel");
 
@@ -19,6 +21,14 @@ const allowedOrigins = [
   "https://github.com/login/oauth/authorize",
 ];
 
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "DELETE", "PUT"],
+    credentials: true,
+  },
+});
 app.use(
   cors({
     origin: allowedOrigins,
@@ -49,14 +59,15 @@ app.post("/createsub", authenticator, async function (req, res) {
       created: false,
     });
   } else {
-    const subreddit = new SubRedditModel({
+    const subreddit = await SubRedditModel.create({
       subname: subname,
       subdescription: subdescription,
       accessiblity: accessiblity,
       topics: topics,
       creatorId: userid,
     });
-    await subreddit.save();
+    // await subreddit.save();
+    await UserModel.updateOne({ _id: userid }, { $push: { communitiesjoined: subreddit._id } });
     res.json({
       created: true,
     });
@@ -181,13 +192,13 @@ app.post("/searchcommunity", authenticator, async function (req, res) {
 });
 app.post("/mycommunitylist", authenticator, async function (req, res) {
   const userid = new mongoose.Types.ObjectId(req.decoded.userid);
-  const communityList = await SubRedditModel.find(
-    { creatorId: userid },
+  const communityList = await UserModel.findOne(
+    { _id: userid },
     {
-      subname: 1,
-      _id: 1,
+      communitiesjoined: 1,
+      _id: 0,
     }
-  );
+  ).populate("communitiesjoined", "_id subname");
   if (communityList) {
     res.json({ communityList, isPresent: true });
   } else {
@@ -210,10 +221,22 @@ app.post("/validpathchecker", authenticator, async function (req, res) {
 app.post("/posts", authenticator, async function (req, res) {
   const communityId = req.body.communityId;
   const userid = req.decoded.userid;
+  const sortType = req.body.sortType;
+  let sortObject;
+  if (sortType == "recent") {
+    sortObject = { createdAt: -1 };
+  } else if (sortType == "likes") {
+    sortObject = { upvote: -1 };
+  } else if (sortType == "dislike") {
+    sortObject = { downvote: -1 };
+  }
   const posts = await PostModel.find(
     { communityId: communityId },
     { postbody: 0 }
-  ).populate("userid", "username");
+  )
+    .populate("userid", "username")
+    .sort(sortObject)
+    .limit(10);
   if (posts) {
     const modifiedposts = posts.map((ele) => {
       let obj = ele.toObject();
@@ -478,7 +501,7 @@ app.post("/addcomment", authenticator, async function (req, res) {
   let parentid;
   // console.log(userid, postid, parentID);
   if (parentID != null) {
-    parentid=new mongoose.Types.ObjectId(parentID)
+    parentid = new mongoose.Types.ObjectId(parentID);
     const depthObject = await CommentModel.findOne(
       { postId: postid, _id: parentid },
       { _id: 0, depth: 1 }
@@ -505,11 +528,23 @@ app.post("/addcomment", authenticator, async function (req, res) {
 app.post("/fetchcomments", authenticator, async function (req, res) {
   const postid = req.body.postid;
   const userid = req.decoded.userid;
+  const sortType = req.body.sortType;
+  let sortObject;
+  if (sortType == "recent") {
+    sortObject = { createdAt: -1 };
+  } else if (sortType == "likes") {
+    sortObject = { upvote: -1 };
+  } else if (sortType == "dislike") {
+    sortObject = { downvote: -1 };
+  }
   try {
     const commentsArray = await CommentModel.find({
       postId: postid,
       parentId: null,
-    }).populate("userid", "username");
+    })
+      .populate("userid", "username")
+      .sort(sortObject)
+      .limit(10);
     let modifiedcommentsArray = commentsArray.map((ele) => {
       let obj = ele.toObject();
       const hasLiked = obj.upvoterId.some((id) => id.equals(userid));
@@ -532,6 +567,175 @@ app.post("/fetchcomments", authenticator, async function (req, res) {
     });
   }
 });
+
+app.post("/feed", async function (req, res) {
+  try {
+    const communityIds = await SubRedditModel.find()
+      .sort({ postCount: -1 })
+      .limit(10);
+    const sortType = req.body.sortType;
+    let sortObject;
+    if (sortType == "recent") {
+      sortObject = { createdAt: -1 };
+    } else if (sortType == "likes") {
+      sortObject = { upvote: -1 };
+    } else if (sortType == "dislike") {
+      sortObject = { downvote: -1 };
+    }
+    let postsArray = [];
+    let promiseArrays = communityIds.map(async (id) => {
+      const posts = await PostModel.find({ communityId: id }).populate("userid", "username").populate("communityId", "subname").sort(sortType).limit(5);
+      if (posts && posts.length > 0) {
+        const modifiedposts = posts.map((ele) => {
+          let obj = ele.toObject();
+          delete obj.upvoterId;
+          delete obj.downvoterId;
+          delete obj.bookmarkerId;
+          return obj;
+        })
+        return modifiedposts;
+      }
+      else {
+        return [];
+      }
+    })
+    postsArray = await Promise.all(promiseArrays);
+    postsArray = postsArray.flat();
+    if (sortType === "recent") {
+      postsArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+    else if (sortType == "likes") {
+      postsArray.sort((a, b) => b.upvote - a.upvote);
+    }
+    else if (sortType == "dislike") {
+      postsArray.sort((a, b) => b.downvote - a.downvote);
+
+    }
+    res.json({
+      isAbleToLoad: true,
+      postsArray: postsArray,
+    });
+  } catch (err) {
+    res.json({ isAbleToLoad: false });
+  }
+});
+app.post("/feedauthenticated", authenticator, async function (req, res) {
+  try {
+    const userid = req.decoded.userid;
+    const sortType = req.body.sortType;
+    console.log(sortType);
+    let sortObject;
+    if (sortType == "recent") {
+      sortObject = { createdAt: -1 };
+    } else if (sortType == "likes") {
+      sortObject = { upvote: -1 };
+    } else if (sortType == "dislike") {
+      sortObject = { downvote: -1 };
+    }
+    const followedCommunity = await UserModel.findOne({ _id: userid }, { communitiesjoined: 1 });
+    let postsArray = [];
+    let followedPostSet = new Set();
+    if (followedCommunity && followedCommunity.communitiesjoined.length > 0) {
+      let promiseArrays = followedCommunity.communitiesjoined.map(async (id) => {
+        const posts = await PostModel.find({ communityId: id }).populate("userid", "username").populate("communityId", "subname").sort(sortObject).limit(5);
+        if (posts && posts.length > 0) {
+          const modifiedposts = posts.map((ele) => {
+            let obj = ele.toObject();
+            delete obj.upvoterId;
+            delete obj.downvoterId;
+            delete obj.bookmarkerId;
+            return obj;
+          })
+          return modifiedposts;
+        }
+        else {
+          return [];
+        }
+      })
+      postsArray = await Promise.all(promiseArrays);
+      postsArray = postsArray.flat();
+
+      postsArray.forEach((post) => {
+        followedPostSet.add(post._id.toString());
+      });
+    }
+
+    const communityIdsGlobal = await SubRedditModel.find()
+      .sort({ postCount: -1 })
+      .limit(10);
+    let postsArrayGlobal = [];
+    let promiseArraysGlobal = communityIdsGlobal.map(async (sub) => {
+      const postsGlobal = await PostModel.find({ communityId: sub._id }).populate("userid", "username").populate("communityId", "subname").sort(sortObject).limit(10);
+      if (postsGlobal && postsGlobal.length > 0) {
+        const modifiedpostsGlobal = postsGlobal.map((ele) => {
+          let obj = ele.toObject();
+          if (followedPostSet.size === 0 || !followedPostSet.has(obj._id.toString())) {
+            delete obj.upvoterId;
+            delete obj.downvoterId;
+            delete obj.bookmarkerId;
+            return obj;
+          }
+        })
+        return modifiedpostsGlobal;
+      }
+      else {
+        return [];
+      }
+    })
+    postsArrayGlobal = await Promise.all(promiseArraysGlobal);
+    postsArrayGlobal = postsArrayGlobal.flat();
+
+    let totalFeedPost = [...postsArray, ...postsArrayGlobal];
+    if (sortType === "recent") {
+      totalFeedPost.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+    else if (sortType == "likes") {
+      totalFeedPost.sort((a, b) => b.upvote - a.upvote);
+    }
+    else if (sortType == "dislike") {
+      totalFeedPost.sort((a, b) => b.downvote - a.downvote);
+
+    }
+    totalFeedPost = totalFeedPost.filter((ele) => ele != null)
+    res.json(
+      {
+        isAbleToLoad: true,
+        postsArray: totalFeedPost,
+      }
+    )
+  } catch (err) {
+    res.json({ isAbleToLoad: false });
+  }
+});
+
+app.get("/subredditsgroups", authenticator, async function (req, res) {
+  const userid = req.decoded.userid;
+  // try {
+  const subredditsArray = await SubRedditModel.find(
+    {},
+    { subname: 1, subdescription: 1, membersCount: 1, topics: 1 }
+  );
+  const alreadyjoined = await UserModel.findOne({ _id: userid }, { communitiesjoined: 1, _id: 0 });
+  let joinedSet;
+  if (alreadyjoined.communitiesjoined.length != 0) {
+    joinedSet = new Set(alreadyjoined.communitiesjoined.map(id => id.toString()));
+  }
+
+  modifiedsubredditsArray = subredditsArray.filter((sub) => {
+    if (joinedSet === undefined || !joinedSet.has(sub._id.toString()))
+      return true;
+  })
+
+  res.json({
+    subredditsArray: modifiedsubredditsArray
+  })
+  // }
+  // catch (err) {
+  //   res.json({
+  //     message: "Error occured"
+  //   })
+  // }
+})
 
 app.post("/fetchreply", authenticator, async function (req, res) {
   const postid = req.body.postid;
@@ -566,6 +770,87 @@ app.post("/fetchreply", authenticator, async function (req, res) {
   }
 });
 
-app.listen(process.env.BACKEND_PORT, () => {
+app.post("/joingroup", authenticator, async function (req, res) {
+  try {
+    const userid = req.decoded.userid;
+    const communityid = req.body.communityid;
+    const community = await UserModel.findOne({ _id: userid }, { communitiesjoined: 1, _id: 0 });
+    let found = community.communitiesjoined.some((community) => community.equals(communityid));
+
+    if (found) {
+      await UserModel.updateOne({ _id: userid }, { $pull: { communitiesjoined: communityid } });
+      res.json({
+        joined: false
+      })
+    }
+    else {
+      await UserModel.updateOne({ _id: userid }, { $push: { communitiesjoined: communityid } });
+      res.json({
+        joined: true
+      })
+    }
+  }
+  catch (err) {
+    res.json({
+      message: "Error occured"
+    })
+  }
+})
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+
+  jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+    if (err) {
+      return next(new Error("Authentication error"));
+    }
+    socket.user = decoded;
+    next();
+  });
+});
+
+io.on("connection", (socket) => {
+  console.log(socket.id);
+  socket.on("addComment", async function (commentArgs) {
+    const userid = new mongoose.Types.ObjectId(socket.user.userid);
+    const postid = new mongoose.Types.ObjectId(commentArgs.postid);
+    const parentID = commentArgs.parentid;
+    const comment = commentArgs.comment;
+    let depth = 0;
+    let parentid;
+    if (parentID != null) {
+      parentid = new mongoose.Types.ObjectId(parentID);
+      const depthObject = await CommentModel.findOne(
+        { postId: postid, _id: parentid },
+        { _id: 0, depth: 1 }
+      );
+      // console.log(depthObject);
+      depth = depthObject.depth + 1;
+    }
+    const commentAdded = await CommentModel.create({
+      userid: userid,
+      postId: postid,
+      parentId: parentid,
+      commentText: comment,
+      depth: depth,
+    });
+    console.log(commentAdded);
+    io.to(commentArgs.room).emit(
+      `commentAdded${commentArgs.room}`,
+      commentAdded
+    );
+  });
+  socket.on("joinRoomOfComment", (args) => {
+    socket.join(args.room);
+    // console.log(socket.id+"joined"+args.room);
+  });
+  socket.on("leaveRoomOfComment", (args) => {
+    socket.leave(args.room);
+    // console.log(socket.id+"left"+args.room);
+  });
+});
+httpServer.listen(process.env.BACKEND_PORT, () => {
   console.log(`server running at ${process.env.BACKEND_PORT}`);
 });
+// app.listen(process.env.BACKEND_PORT, () => {
+//   console.log(`server running at ${process.env.BACKEND_PORT}`);
+// });

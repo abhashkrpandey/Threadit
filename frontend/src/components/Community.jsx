@@ -5,7 +5,7 @@ export default function Community() {
     return (
         <div className="flex flex-col">
             <div className="text-xl">Communities</div>
-            <div className="hover:bg-gray-300" onClick={() => (navigate("/createsub"))}>+Create Community</div>
+            <div className="hover:bg-gray-300 cursor-default" onClick={() => (navigate("/createsub"))}>+Create Community</div>
             <MyJoinedCommunityList></MyJoinedCommunityList>
         </div>
     )

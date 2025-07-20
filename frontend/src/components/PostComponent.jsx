@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import LikeDisLikeButton from "../mini-components/LikeDisLikeButton";
 import BookMark from "../mini-components/BookMark";
+import DateTime from "../mini-components/DateTime";
 export default function PostComponent({ props }) {
   const navigate = useNavigate();
   function postPageOpenFunc() {
@@ -10,10 +11,13 @@ export default function PostComponent({ props }) {
   }
   return (
     <>
-      <div
-        className="flex flex-col hover:bg-gray-400"
-        onClick={postPageOpenFunc}
-      >
+      <div className="flex flex-col hover:bg-gray-400" onClick={postPageOpenFunc}>
+        {props.communityId.subname!==undefined?(
+          <div className="flex flex-row">
+            r/{props.communityId.subname}-
+            <div><DateTime date={props.createdAt}/></div>
+          </div>
+        ):(<div></div>)}
         <div>Title:{props.posttitle}</div>
         <div>Post by :{`/u/${props.userid.username}`}</div>
         <div className="flex flex-row">
