@@ -15,6 +15,7 @@ import CreateSubThreadit from "./pages/CreateSubThreadit";
 import SubThreadit from "./pages/SubThreadit";
 import PostPage from "./components/PostPage";
 import Explore from "./pages/Explore";
+import UserProfile from "./pages/UserProfile";
 
 export default function App() {
   axios.defaults.withCredentials = true;
@@ -42,6 +43,7 @@ export default function App() {
       <Route path="/createsub" element={<CreateSubThreadit></CreateSubThreadit>}></Route>
       <Route path="/t/:subname" element={<SubThreadit></SubThreadit>}></Route>
       <Route path="/post/:postid" element={<PostPage></PostPage>}></Route>
+      <Route path="/u/:username" element={<UserProfile></UserProfile>}></Route>
     </Routes>
   );
 }

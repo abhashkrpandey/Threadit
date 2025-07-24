@@ -796,6 +796,66 @@ app.post("/joingroup", authenticator, async function (req, res) {
     })
   }
 })
+
+app.post("/uservalid", authenticator, async function (req, res) {
+  const username = req.body.username;
+  try {
+    const usernameInDB = await UserModel.findOne({ username: username }, { username: 1, _id: 1 });
+    let userinfo = {};
+    if (usernameInDB.username) {
+      const likes = await PostModel.find({ upvoterId: { $in: [usernameInDB._id] } },
+        {
+          communityId: 1, createdAt: 1, updatedAt: 1, posttitle: 1, _id: 1
+        }
+      ).populate("communityId", "subname _id");
+      if (likes.length > 0) {
+        userinfo.likes=likes;
+      }
+      const dislikes = await PostModel.find({ downvoterId: { $in: [usernameInDB._id] } },
+        {
+          communityId: 1, createdAt: 1, updatedAt: 1, posttitle: 1, _id: 1
+        }
+      ).populate("communityId", "subname _id");
+      if (dislikes.length > 0) {
+        userinfo.dislikes=dislikes;
+      }
+      const bookmarks = await PostModel.find({ bookmarkerId: { $in: [usernameInDB._id] } },
+        {
+          communityId: 1, createdAt: 1, updatedAt: 1, posttitle: 1, _id: 1
+        }
+      ).populate("communityId", "subname _id");
+      if (bookmarks.length > 0) {
+        userinfo.bookmarks=bookmarks;
+      }
+      const posts = await PostModel.find({ userid: usernameInDB._id },
+        {
+          communityId: 1, createdAt: 1, updatedAt: 1, posttitle: 1, _id: 1
+        }
+      ).populate("communityId", "subname _id");
+      if (posts.length > 0) {
+        userinfo.posts=posts;
+      }
+      userinfo.userid=usernameInDB._id;
+      userinfo.username=usernameInDB.username;
+      res.json({
+        isValidUser: true,
+        userinfo: userinfo
+      })
+    }
+    else {
+      res.json({
+        isValidUser: false
+      })
+    }
+  }
+  catch (err) {
+    res.json(
+      {
+        message: "some error occured"
+      }
+    )
+  }
+})
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
 

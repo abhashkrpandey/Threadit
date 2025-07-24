@@ -19,6 +19,10 @@ export default function Navbar() {
     function createfunc() {
         navigate("/create");
     }
+    function userProfileOpen()
+    {
+        navigate(`/u/${username}`)
+    }
     return (
         <>
             <div className="flex flex-row justify-between gap-2  border-gray-300 border-b-2 ">
@@ -44,7 +48,7 @@ export default function Navbar() {
                         )}
                     </div>
                     {(isLoggedIn) ? (
-                        <div>{username}</div>
+                        <div onClick={userProfileOpen} className="cursor-default bg-amber-500">{username}</div>
                     ) : (
                         <div className="flex flex-row">
                             <div className="bg-orange-600 rounded-3xl text-white p-2">
