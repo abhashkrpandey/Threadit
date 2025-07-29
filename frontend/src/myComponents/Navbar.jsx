@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button.jsx";
 import { Plus } from "lucide-react";
+import { Ellipsis } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,7 +74,9 @@ export default function Navbar() {
               <DropdownMenuContent>
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={userProfileOpen}>Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={userProfileOpen}>
+                  Profile
+                </DropdownMenuItem>
                 <DropdownMenuItem>Dark Mode</DropdownMenuItem>
                 <DropdownMenuItem>Edit Avatar</DropdownMenuItem>
               </DropdownMenuContent>
@@ -81,13 +84,14 @@ export default function Navbar() {
           ) : (
             // <Button onClick={userProfileOpen} variant="default">{username}</Button>
             <div className="flex flex-row">
-              <div className="bg-orange-600 rounded-3xl text-white p-2">
-                <div>
-                  <button onClick={loginfunc}>Login</button>
-                </div>
-              </div>
+              <Button
+                className="bg-orange-600 rounded-3xl text-white p-2"
+                onClick={loginfunc}
+              >
+                Login
+              </Button>
               <div className="p-2">
-                <img src={threedot} height={20} width={20}></img>
+              <Ellipsis />
               </div>
             </div>
           )}

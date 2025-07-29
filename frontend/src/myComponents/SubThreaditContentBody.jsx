@@ -82,13 +82,13 @@ export default function SubThreaditContentBody() {
       }
     }
     postCollector();
-  }, [sortType, currentPage]);
+  }, [sortType, currentPage,SubThreaditDetails.subname]);
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex flex-row justify-end">
         <Button onClick={createfunc} variant={"ghost"} className={"border-1 border-black "}>
           <Plus/>Create Post</Button>
-          <Button onClick={createfunc} variant={"ghost"} className={hasJoined?`bg-white text-black border-1 border-black `:`bg-blue-500`}>
+          <Button  variant={"ghost"} className={hasJoined?`bg-white text-black border-1 border-black `:`bg-blue-500`}>
           {hasJoined?(<>Joined</>):(<>Join</>)}</Button>
       </div>
       <div className="grid grid-cols-5">
@@ -146,9 +146,6 @@ export default function SubThreaditContentBody() {
                         <PaginationItem>
                           <PaginationLink
                             id={currentPage + 1}
-                            onClick={(event) => {
-                              setCurrentPage(event.target.id);
-                            }}
                             className={`cursor-default bg-gray-500 `}
                           >
                             {currentPage}

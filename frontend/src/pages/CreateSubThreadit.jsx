@@ -6,6 +6,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function CreateSubThreadit() {
   const userid = useSelector((state) => state.login.userinfo.userid);
@@ -122,22 +124,22 @@ export default function CreateSubThreadit() {
         <Left />
         <div className="flex flex-col gap-2 w-[70%]">
           <div className="text-2xl">Create Community</div>
-          <input
+          <Input
             required
             id="subname"
             maxLength={20}
             className="bg-gray-300 rounded-sm w-[50vw] h-[5vh]"
             placeholder="Unique Subreddit Name"
             onChange={inputter}
-          ></input>
-          <input
+          ></Input>
+          <Input
             required
             id="subdescription"
             maxLength={150}
             className="bg-gray-300 rounded-sm w-[50vw] h-[5vh]"
             placeholder="Description"
             onChange={inputter}
-          ></input>
+          ></Input>
           <div className="flex flex-col">
             <div className="text-xl">what kind of community is this?</div>
             <label className="hover:bg-gray-300 flex flex-row justify-between">
@@ -173,7 +175,7 @@ export default function CreateSubThreadit() {
             </label>
           </div>
           <div className="flex flex-col">
-            <div className="text-xl">Topics Related To this community</div>
+            <div className="text-xl">Select topics Related To this community</div>
             <div className=" grid grid-cols-7 w-200">
               {topicsArray.map((topic) => {
                 return (
@@ -192,9 +194,9 @@ export default function CreateSubThreadit() {
             <div className="text-red-600 text-sm">{warning}</div>
           </div>
           <div className="flex flex-row justify-end">
-            <button className="bg-blue-600" onClick={createCommFunc}>
+            <Button className="bg-blue-600" onClick={createCommFunc}>
               Create Community
-            </button>
+            </Button>
           </div>
         </div>
         {/* <div><Right /></div> */}
