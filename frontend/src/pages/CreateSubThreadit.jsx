@@ -1,6 +1,6 @@
-import Navbar from "../components/Navbar";
-import Left from "../components/Left";
-import Right from "../components/Right";
+import Navbar from "../myComponents/Navbar";
+import Left from "../myComponents/Left";
+import Right from "../myComponents/Right";
 import { useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";

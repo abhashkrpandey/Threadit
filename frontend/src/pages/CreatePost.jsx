@@ -1,6 +1,6 @@
-import Navbar from "../components/Navbar"
-import Left from "../components/Left"
-import CreatePostContent from "../components/CreatePostContent";
+import Navbar from "../myComponents/Navbar"
+import Left from "../myComponents/Left"
+import CreatePostContent from "../myComponents/CreatePostContent";
 import { useSelector } from "react-redux";
 import NotLoggedIn from "./NotLoggedIn";
 export default function CreatePost() {

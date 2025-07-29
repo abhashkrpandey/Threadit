@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
+import { Button } from "@/components/ui/button";
 export default function MyJoinedCommunityList() {
   const [communityList, setCommunityList] = useState([]);
   const navigate=useNavigate();
@@ -20,7 +21,7 @@ export default function MyJoinedCommunityList() {
     <>
       <div className="flex flex-col">
         {communityList.map((ele) => (
-          <button key={ele._id.toString()} onClick={()=>(navigate(`/t/${ele.subname}`))}  className="hover:bg-gray-300">{ele.subname}</button>
+          <Button   variant="ghost" size="sm" key={ele._id.toString()} onClick={()=>(navigate(`/t/${ele.subname}`))}  className="hover:bg-gray-300">{ele.subname}</Button>
         ))}
       </div>
     </>

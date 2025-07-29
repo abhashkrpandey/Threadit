@@ -13,7 +13,7 @@ import CreatePost from "./pages/CreatePost";
 import { updateUserInfo } from "./reducers/loginSlice";
 import CreateSubThreadit from "./pages/CreateSubThreadit";
 import SubThreadit from "./pages/SubThreadit";
-import PostPage from "./components/PostPage";
+import PostPage from "./myComponents/PostPage";
 import Explore from "./pages/Explore";
 import UserProfile from "./pages/UserProfile";
 

@@ -1,10 +1,12 @@
-import emptylike from "../assets/emptylike.svg";
-import filledlike from "../assets/filledlike.svg";
-import emptydislike from "../assets/emptydislike.svg";
-import filleddislike from "../assets/filleddislike.svg";
+// import emptylike from "../assets/emptylike.svg";
+// import filledlike from "../assets/filledlike.svg";
+// import emptydislike from "../assets/emptydislike.svg";
+// import filleddislike from "../assets/filleddislike.svg";
 import axios from "axios";
-import Swal from "sweetalert2";
+// import Swal from "sweetalert2";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ThumbsUp, ThumbsDown, LucideThumbsUp } from "lucide-react";
 export default function LikeDisLikeButton(props) {
   const [hasLiked, sethasLiked] = useState(props.hasLiked);
   const [upvoteLive, setupvoteLive] = useState(Number(props.upvote));
@@ -16,7 +18,7 @@ export default function LikeDisLikeButton(props) {
       import.meta.env.VITE_BACKEND_URL + "/like",
       {
         postid: props.postid,
-        commentid:props.commentid
+        commentid: props.commentid,
       }
     );
     console.log(response.data.toogle);
@@ -28,11 +30,13 @@ export default function LikeDisLikeButton(props) {
       setdownvoteLive(downvoteLive - 1);
       sethasLiked(true);
       sethasdisLiked(false);
-    } else {
-      Swal.fire({
-        title: "already like counted",
-        icon: "error",
-      });
+    } else if(response.data.likeCounted==false && response.data.message=="Already liked") {
+      // Swal.fire({
+      //   title: "already like counted",
+      //   icon: "error",
+      // });
+      sethasLiked(false);
+      setupvoteLive(upvoteLive-1);
     }
   }
   async function dislikeFunc(event) {
@@ -41,7 +45,7 @@ export default function LikeDisLikeButton(props) {
       import.meta.env.VITE_BACKEND_URL + "/dislike",
       {
         postid: props.postid,
-        commentid:props.commentid
+        commentid: props.commentid,
       }
     );
     if (response.data.dislikeCounted && response.data.toggle == false) {
@@ -52,31 +56,43 @@ export default function LikeDisLikeButton(props) {
       setupvoteLive(upvoteLive - 1);
       sethasdisLiked(true);
       sethasLiked(false);
-    } else {
-      Swal.fire({
-        title: "already disliked",
-        icon: "error",
-      });
+    } else if(response.data.dislikeCounted==false && response.data.message=="Already disliked"){
+      // Swal.fire({
+      //   title: "already disliked",
+      //   icon: "error",
+      // });
+      sethasdisLiked(false);
+      setdownvoteLive(downvoteLive-1);
     }
   }
   return (
     <div className="flex flex-row">
-      <button className="flex flex-row hover:bg-gray-600" onClick={likeFunc}>
-        <img
+      <Button
+        variant={"outline"}
+        onClick={likeFunc}
+        className={"hover:bg-gray-300"}
+      >
+        {/* <img
           src={hasLiked ? filledlike : emptylike}
           width={16}
           height={16}
-        ></img>
+        ></img> */}
+        {hasLiked ? <ThumbsUp className="fill-orange-500" /> : <ThumbsUp />}
         {upvoteLive}
-      </button>
-      <button className="flex flex-row hover:bg-gray-600" onClick={dislikeFunc}>
-        <img
+      </Button>
+      <Button variant={"outline"} onClick={dislikeFunc} className={"hover:bg-gray-300"}>
+        {/* <img
           src={hasdisLiked ? filleddislike : emptydislike}
           width={16}
           height={16}
-        ></img>
+        ></img> */}
+        {hasdisLiked ? (
+          <ThumbsDown className="fill-orange-500" />
+        ) : (
+          <ThumbsDown />
+        )}
         {downvoteLive}
-      </button>
+      </Button>
     </div>
   );
 }

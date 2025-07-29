@@ -1,7 +1,7 @@
-import Navbar from "../components/Navbar";
-import Left from "../components/Left";
-import Right from "../components/Right";
-import SubRedditGroup from "../components/SubRedditGroup";
+import Navbar from "../myComponents/Navbar";
+import Left from "../myComponents/Left";
+import Right from "../myComponents/Right";
+import SubRedditGroup from "../myComponents/SubRedditGroup";
 import { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";

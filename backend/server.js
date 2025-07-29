@@ -218,49 +218,66 @@ app.post("/validpathchecker", authenticator, async function (req, res) {
     });
   }
 });
-app.post("/posts", authenticator, async function (req, res) {
-  const communityId = req.body.communityId;
-  const userid = req.decoded.userid;
-  const sortType = req.body.sortType;
-  let sortObject;
-  if (sortType == "recent") {
-    sortObject = { createdAt: -1 };
-  } else if (sortType == "likes") {
-    sortObject = { upvote: -1 };
-  } else if (sortType == "dislike") {
-    sortObject = { downvote: -1 };
+app.get("/posts", authenticator, async function (req, res) {
+  const pageSize = 5;
+  try {
+    const communityId = req.query.communityId;
+    const userid = req.decoded.userid;
+    const pageNumber = parseInt(req.query.pageNumber) || 1;
+    const sortType = req.query.sortType;
+    let sortObject;
+    if (sortType == "recent") {
+      sortObject = { createdAt: -1 };
+    } else if (sortType == "likes") {
+      sortObject = { upvote: -1 };
+    } else if (sortType == "dislike") {
+      sortObject = { downvote: -1 };
+    }
+    const userJoinedCommunities=await UserModel.findOne({_id:userid},{_id:0,communitiesjoined:1});
+    const joinedCommunity=userJoinedCommunities.communitiesjoined.some((id)=>id.equals(new mongoose.Types.ObjectId(communityId)));
+    console.log(userJoinedCommunities.communitiesjoined);
+    console.log(communityId);
+    console.log(joinedCommunity);
+    const total = await PostModel.countDocuments({ communityId: communityId });
+    const totalPages = Math.ceil(total / pageSize);
+    const skip = (pageNumber - 1) * pageSize;
+    const posts = await PostModel.find(
+      { communityId: communityId },
+      { postbody: 0 }
+    )
+      .populate("userid", "username")
+      .sort({ ...sortObject, _id: 1 }).skip(skip).limit(pageSize);
+    if (posts) {
+      const modifiedposts = posts.map((ele) => {
+        let obj = ele.toObject();
+        const hasLiked = obj.upvoterId.some((id) => id.equals(userid));
+        const hasdisLiked = obj.downvoterId.some((id) => id.equals(userid));
+        const hasbookmarked = obj.bookmarkerId.some((id) => id.equals(userid));
+
+        delete obj.upvoterId;
+        delete obj.downvoterId;
+        delete obj.bookmarkerId;
+
+        obj.hasLiked = hasLiked;
+        obj.hasdisLiked = hasdisLiked;
+        obj.hasbookmarked = hasbookmarked;
+        return obj;
+      });
+      res.json({
+        isThereAnyPost: true,
+        totalPages: totalPages,
+        posts: modifiedposts,
+        hasJoined:joinedCommunity
+      });
+    } else {
+      res.json({
+        isThereAnyPost: false,
+      });
+    }
   }
-  const posts = await PostModel.find(
-    { communityId: communityId },
-    { postbody: 0 }
-  )
-    .populate("userid", "username")
-    .sort(sortObject)
-    .limit(10);
-  if (posts) {
-    const modifiedposts = posts.map((ele) => {
-      let obj = ele.toObject();
-      const hasLiked = obj.upvoterId.some((id) => id.equals(userid));
-      const hasdisLiked = obj.downvoterId.some((id) => id.equals(userid));
-      const hasbookmarked = obj.bookmarkerId.some((id) => id.equals(userid));
-
-      delete obj.upvoterId;
-      delete obj.downvoterId;
-      delete obj.bookmarkerId;
-
-      obj.hasLiked = hasLiked;
-      obj.hasdisLiked = hasdisLiked;
-      obj.hasbookmarked = hasbookmarked;
-      return obj;
-    });
-    res.json({
-      isThereAnyPost: true,
-      posts: modifiedposts,
-    });
-  } else {
-    res.json({
-      isThereAnyPost: false,
-    });
+  catch (err) {
+    console.log(err.message);
+    res.json({ isThereAnyPost: false });
   }
 });
 app.post("/like", authenticator, async function (req, res) {
@@ -318,6 +335,7 @@ app.post("/like", authenticator, async function (req, res) {
       toggle = true;
     }
     if (post.upvoterId.some((id) => id.equals(userid))) {
+      await PostModel.updateOne({ _id: postid }, { $inc: { upvote: -1 }, $pull: { upvoterId: userid } });
       res.json({
         likeCounted: false,
         message: "Already liked",
@@ -399,6 +417,7 @@ app.post("/dislike", authenticator, async function (req, res) {
     }
     console.log(post);
     if (post.downvoterId.some((id) => id.equals(userid))) {
+      await PostModel.updateOne({ _id: postid }, { $inc: { downvote: -1 }, $pull: { downvoterId: userid } });
       res.json({
         dislikeCounted: false,
         message: "Already disliked",
@@ -568,12 +587,15 @@ app.post("/fetchcomments", authenticator, async function (req, res) {
   }
 });
 
-app.post("/feed", async function (req, res) {
+app.get("/feed", async function (req, res) {
+  const pageSize = 5;
+  const pageNumber = parseInt(req.query.pageNumber) || 1;
+  console.log(pageNumber);
   try {
     const communityIds = await SubRedditModel.find()
       .sort({ postCount: -1 })
       .limit(10);
-    const sortType = req.body.sortType;
+    const sortType = req.query.sortType;
     let sortObject;
     if (sortType == "recent") {
       sortObject = { createdAt: -1 };
@@ -582,47 +604,43 @@ app.post("/feed", async function (req, res) {
     } else if (sortType == "dislike") {
       sortObject = { downvote: -1 };
     }
-    let postsArray = [];
-    let promiseArrays = communityIds.map(async (id) => {
-      const posts = await PostModel.find({ communityId: id }).populate("userid", "username").populate("communityId", "subname").sort(sortType).limit(5);
-      if (posts && posts.length > 0) {
-        const modifiedposts = posts.map((ele) => {
-          let obj = ele.toObject();
-          delete obj.upvoterId;
-          delete obj.downvoterId;
-          delete obj.bookmarkerId;
-          return obj;
-        })
-        return modifiedposts;
-      }
-      else {
-        return [];
-      }
+    const total = await PostModel.countDocuments({ communityId: { $in: communityIds } });
+    const totalPages = Math.ceil(total / pageSize);
+    const skip = (pageNumber - 1) * pageSize;
+    const postsArray = await PostModel.find({ communityId: { $in: communityIds } }).populate("userid", "username").populate("communityId", "subname").sort({ ...sortObject, _id: 1 }).skip(skip).limit(pageSize);
+    const modifiedposts = postsArray.map((ele) => {
+      let obj = ele.toObject();
+      delete obj.upvoterId;
+      delete obj.downvoterId;
+      delete obj.bookmarkerId;
+      return obj;
     })
-    postsArray = await Promise.all(promiseArrays);
-    postsArray = postsArray.flat();
     if (sortType === "recent") {
-      postsArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      modifiedposts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
     else if (sortType == "likes") {
-      postsArray.sort((a, b) => b.upvote - a.upvote);
+      modifiedposts.sort((a, b) => b.upvote - a.upvote);
     }
     else if (sortType == "dislike") {
-      postsArray.sort((a, b) => b.downvote - a.downvote);
+      modifiedposts.sort((a, b) => b.downvote - a.downvote);
 
     }
     res.json({
       isAbleToLoad: true,
-      postsArray: postsArray,
+      postsArray: modifiedposts,
+      totalPages: totalPages
     });
   } catch (err) {
+    console.log(err.message);
     res.json({ isAbleToLoad: false });
   }
 });
-app.post("/feedauthenticated", authenticator, async function (req, res) {
+app.get("/feedauthenticated", authenticator, async function (req, res) {
+  const pageSize = 5;
+  const pageNumber = parseInt(req.query.pageNumber) || 1;
   try {
     const userid = req.decoded.userid;
-    const sortType = req.body.sortType;
+    const sortType = req.query.sortType;
     console.log(sortType);
     let sortObject;
     if (sortType == "recent") {
@@ -632,78 +650,57 @@ app.post("/feedauthenticated", authenticator, async function (req, res) {
     } else if (sortType == "dislike") {
       sortObject = { downvote: -1 };
     }
-    const followedCommunity = await UserModel.findOne({ _id: userid }, { communitiesjoined: 1 });
-    let postsArray = [];
-    let followedPostSet = new Set();
-    if (followedCommunity && followedCommunity.communitiesjoined.length > 0) {
-      let promiseArrays = followedCommunity.communitiesjoined.map(async (id) => {
-        const posts = await PostModel.find({ communityId: id }).populate("userid", "username").populate("communityId", "subname").sort(sortObject).limit(5);
-        if (posts && posts.length > 0) {
-          const modifiedposts = posts.map((ele) => {
-            let obj = ele.toObject();
-            delete obj.upvoterId;
-            delete obj.downvoterId;
-            delete obj.bookmarkerId;
-            return obj;
-          })
-          return modifiedposts;
-        }
-        else {
-          return [];
-        }
-      })
-      postsArray = await Promise.all(promiseArrays);
-      postsArray = postsArray.flat();
-
-      postsArray.forEach((post) => {
-        followedPostSet.add(post._id.toString());
-      });
-    }
-
-    const communityIdsGlobal = await SubRedditModel.find()
+    let mergedCommunity = new Set();
+    const followedCommunity = await UserModel.findOne({ _id: userid }, { communitiesjoined: 1, _id: 0 });
+    const communityIds = await SubRedditModel.find({}, { _id: 1 })
       .sort({ postCount: -1 })
       .limit(10);
-    let postsArrayGlobal = [];
-    let promiseArraysGlobal = communityIdsGlobal.map(async (sub) => {
-      const postsGlobal = await PostModel.find({ communityId: sub._id }).populate("userid", "username").populate("communityId", "subname").sort(sortObject).limit(10);
-      if (postsGlobal && postsGlobal.length > 0) {
-        const modifiedpostsGlobal = postsGlobal.map((ele) => {
-          let obj = ele.toObject();
-          if (followedPostSet.size === 0 || !followedPostSet.has(obj._id.toString())) {
-            delete obj.upvoterId;
-            delete obj.downvoterId;
-            delete obj.bookmarkerId;
-            return obj;
-          }
-        })
-        return modifiedpostsGlobal;
-      }
-      else {
-        return [];
+    // console.log(followedCommunity + "follow");
+    // console.log(communityIds + " trending");
+    followedCommunity.communitiesjoined.map((ele) => {
+      mergedCommunity.add(ele.toString());
+    })
+    communityIds.map((ele) => {
+      if (!mergedCommunity.has(ele._id.toString())) {
+        mergedCommunity.add(ele);
       }
     })
-    postsArrayGlobal = await Promise.all(promiseArraysGlobal);
-    postsArrayGlobal = postsArrayGlobal.flat();
+    let mergedCommunityArray = [];
+    for (const item of mergedCommunity) {
+      // console.log(item);
+      mergedCommunityArray.push(new mongoose.Types.ObjectId(item));
+    }
 
-    let totalFeedPost = [...postsArray, ...postsArrayGlobal];
-    if (sortType === "recent") {
-      totalFeedPost.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    }
-    else if (sortType == "likes") {
-      totalFeedPost.sort((a, b) => b.upvote - a.upvote);
-    }
-    else if (sortType == "dislike") {
-      totalFeedPost.sort((a, b) => b.downvote - a.downvote);
+    const total = await PostModel.countDocuments({ communityId: { $in: mergedCommunityArray } });
+    const totalPages = Math.ceil(total / pageSize);
+    const skip = (pageNumber - 1) * pageSize;
+    const postsArray = await PostModel.find({ communityId: { $in: mergedCommunityArray } }).populate("userid", "username").populate("communityId", "subname").sort({ ...sortObject, _id: 1 }).skip(skip).limit(pageSize);
+    const modifiedposts = postsArray.map((ele) => {
+      let obj = ele.toObject();
 
-    }
-    totalFeedPost = totalFeedPost.filter((ele) => ele != null)
+      const hasLiked = obj.upvoterId.some((id) => id.equals(userid));
+      const hasdisLiked = obj.downvoterId.some((id) => id.equals(userid));
+      const hasbookmarked = obj.bookmarkerId.some((id) => id.equals(userid));
+
+      obj.hasLiked = hasLiked;
+      obj.hasdisLiked = hasdisLiked;
+      obj.hasbookmarked = hasbookmarked;
+
+      delete obj.upvoterId;
+      delete obj.downvoterId;
+      delete obj.bookmarkerId;
+
+      return obj;
+    })
     res.json(
       {
         isAbleToLoad: true,
-        postsArray: totalFeedPost,
+        totalPages: totalPages,
+        postsArray: modifiedposts,
       }
     )
   } catch (err) {
+    console.log(err.message);
     res.json({ isAbleToLoad: false });
   }
 });
@@ -809,7 +806,7 @@ app.post("/uservalid", authenticator, async function (req, res) {
         }
       ).populate("communityId", "subname _id");
       if (likes.length > 0) {
-        userinfo.likes=likes;
+        userinfo.likes = likes;
       }
       const dislikes = await PostModel.find({ downvoterId: { $in: [usernameInDB._id] } },
         {
@@ -817,7 +814,7 @@ app.post("/uservalid", authenticator, async function (req, res) {
         }
       ).populate("communityId", "subname _id");
       if (dislikes.length > 0) {
-        userinfo.dislikes=dislikes;
+        userinfo.dislikes = dislikes;
       }
       const bookmarks = await PostModel.find({ bookmarkerId: { $in: [usernameInDB._id] } },
         {
@@ -825,7 +822,7 @@ app.post("/uservalid", authenticator, async function (req, res) {
         }
       ).populate("communityId", "subname _id");
       if (bookmarks.length > 0) {
-        userinfo.bookmarks=bookmarks;
+        userinfo.bookmarks = bookmarks;
       }
       const posts = await PostModel.find({ userid: usernameInDB._id },
         {
@@ -833,10 +830,10 @@ app.post("/uservalid", authenticator, async function (req, res) {
         }
       ).populate("communityId", "subname _id");
       if (posts.length > 0) {
-        userinfo.posts=posts;
+        userinfo.posts = posts;
       }
-      userinfo.userid=usernameInDB._id;
-      userinfo.username=usernameInDB.username;
+      userinfo.userid = usernameInDB._id;
+      userinfo.username = usernameInDB.username;
       res.json({
         isValidUser: true,
         userinfo: userinfo

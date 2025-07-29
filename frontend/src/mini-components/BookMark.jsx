@@ -1,6 +1,8 @@
 import bookmark from "../assets/bookmark.svg";
 import filledbookmark from "../assets/filledbookmark.svg";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Bookmark } from "lucide-react";
 import axios from "axios";
 export default function BookMark({ bookmarkCount, hasbookmarked, postid }) {
   const [bookmarkLive, setbookmarkLive] = useState(Number(bookmarkCount));
@@ -16,24 +18,26 @@ export default function BookMark({ bookmarkCount, hasbookmarked, postid }) {
     if (response.data.isbookmarked) {
       setbookmarkLive(bookmarkLive + 1);
       sethasBookmarked(true);
-    } else if(response.data.isbookmarked===false) {
+    } else if (response.data.isbookmarked === false) {
       setbookmarkLive(bookmarkLive - 1);
       sethasBookmarked(false);
     }
   }
   return (
     <>
-      <button
-        className="flex flex-row hover:bg-gray-600"
+      <Button
+        variant={"outline"}
         onClick={bookmarkFunc}
+        className={"hover:bg-gray-300"}
       >
-        <img
+        {/* <img
           src={hasBookmarked ? filledbookmark : bookmark}
           width={16}
           height={16}
-        ></img>
+        ></img> */}
+        {hasBookmarked ? <Bookmark className="fill-orange-500"/> : <Bookmark/>}
         {bookmarkLive}
-      </button>
+      </Button>
     </>
   );
 }

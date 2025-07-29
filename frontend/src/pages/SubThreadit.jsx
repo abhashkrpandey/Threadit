@@ -1,10 +1,10 @@
 import { useParams } from "react-router"
-import Navbar from "../components/Navbar";
-import Left from "../components/Left";
-import Right from "../components/Right";
+import Navbar from "../myComponents/Navbar";
+import Left from "../myComponents/Left";
+import Right from "../myComponents/Right";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import SubThreaditContent from "../components/SubThreaditContent";
+import SubThreaditContent from "../myComponents/SubThreaditContent";
 import { useDispatch } from "react-redux";
 import { updateCurrentActivity } from "../reducers/loginSlice";
 export default function SubThreadit() {
@@ -34,7 +34,7 @@ export default function SubThreadit() {
             <div className="flex flex-row ">
                 <Left />
                 {isValid ? (
-                    <div className="w-[70%] bg-amber-200">
+                    <div className="w-[90%] ">
                     <SubThreaditContent></SubThreaditContent>
                     </div>
                 ) : (
