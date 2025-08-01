@@ -78,7 +78,7 @@ export default function Register() {
   }
   function checkUsername(finalTypedName) {
     if (finalTypedName != undefined && finalTypedName.length > 0) {
-      let firstFive = finalTypedName.substring(0, 6);
+      let firstFive = finalTypedName.substring(0, 5);
       for (let i = 0; i < firstFive.length; i++) {
         let char = firstFive[i];
         if ((char >= "a" && char <= "z") || (char >= "A" && char <= "Z")) {
