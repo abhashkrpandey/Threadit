@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router";
+import { Button } from "@/components/ui/button";
 export default function Explore() {
   const navigate =useNavigate();
   const [subredditgroupsArray, setsubredditgroupsArray] = useState([]);
@@ -29,9 +30,9 @@ export default function Explore() {
       </div>
       <div className="flex flex-row">
         <Left />
-        <div className="flex flex-col">
+        <div className="flex flex-col ml-50 w-[70%]">
           <div className="text-3xl font-bold">Explore Communities</div>
-          <div>
+          <div className="grid grid-cols-3 mt-10">
             {
               subredditgroupsArray.length>0?
              ( subredditgroupsArray.map((sub)=>
@@ -42,14 +43,13 @@ export default function Explore() {
               <div>
                   No Communities available!!
                   <div>
-                      <button className="hover:bg-amber-400" onClick={()=>{navigate("/createsub")}}>Create a Community of your choice</button>
+                      <Button onClick={()=>{navigate("/createsub")}}>Create a Community of your choice</Button>
                   </div>
               </div>
             )
             }
           </div>
         </div>
-        <Right />
       </div>
     </>
   );

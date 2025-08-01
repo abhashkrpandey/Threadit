@@ -31,9 +31,9 @@ export default function PostPage() {
       <div className="flex flex-row">
         <Left></Left>
       {isValidPost ? (
-        <>
+        <div className="ml-50 w-[60%]">
           <PostPageComponent post={postInfo}></PostPageComponent>
-        </>
+        </div>
       ) : (
         <>Not a Valid Post</>
       )}

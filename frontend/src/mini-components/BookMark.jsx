@@ -1,5 +1,3 @@
-import bookmark from "../assets/bookmark.svg";
-import filledbookmark from "../assets/filledbookmark.svg";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Bookmark } from "lucide-react";
@@ -30,11 +28,6 @@ export default function BookMark({ bookmarkCount, hasbookmarked, postid }) {
         onClick={bookmarkFunc}
         className={"hover:bg-gray-300"}
       >
-        {/* <img
-          src={hasBookmarked ? filledbookmark : bookmark}
-          width={16}
-          height={16}
-        ></img> */}
         {hasBookmarked ? <Bookmark className="fill-orange-500"/> : <Bookmark/>}
         {bookmarkLive}
       </Button>

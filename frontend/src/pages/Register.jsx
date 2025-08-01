@@ -2,72 +2,180 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import Swal from "sweetalert2";
-import {useDispatch} from "react-redux";
+import { useDispatch } from "react-redux";
 import { updateUserInfo } from "../reducers/loginSlice";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { BadgeCheckIcon, BadgeX } from "lucide-react";
+function useDebounce(username, delay = 300) {
+  const [name, setName] = useState("");
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setName(username);
+    }, delay);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [username, delay]);
+  return name;
+}
 export default function Register() {
-    const [UserName, setUserName] = useState("");
-    const dispatch=useDispatch();
-    const [UserPassword, setUserPassword] = useState("");
-    const navigate = useNavigate();
-    function inputter(e) {
-        if (e.target.id === "username") {
-            setUserName(e.target.value);
-        }
-        else {
-            setUserPassword(e.target.value);
-        }
+  const [UserName, setUserName] = useState("");
+  const [ValidUserName, setValidUserName] = useState("");
+  const dispatch = useDispatch();
+  const [UserPassword, setUserPassword] = useState("");
+  const finalTypedName = useDebounce(UserName);
+  const navigate = useNavigate();
+  const [isNameValid, setisNameValid] = useState(false);
+  function inputter(e) {
+    if (e.target.id === "username") {
+      setUserName(e.target.value);
+    } else {
+      setUserPassword(e.target.value);
     }
-    async function register(e) {
-        e.preventDefault();
-        if ((UserName.length === 0 || UserName.length >= 21)) {
-            Swal.fire({
-                title: "Error!",
-                text: "Name's length should between 1 to 20",
-                icon: "error",
-                confirmButtonText: "OK"
-            })
+  }
+  async function register(e) {
+    e.preventDefault();
+    if (UserPassword.length <= 6 || UserPassword.length >= 21) {
+      Swal.fire({
+        title: "Error!",
+        text: "Password's length should between 7 and 20",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } else if (isNameValid === true) {
+      const response = await axios.post(
+        import.meta.env.VITE_BACKEND_URL + "/register",
+        {
+          username: ValidUserName,
+          userpassword: UserPassword,
         }
-        else if (UserPassword.length <= 6 || UserPassword.length >= 21) {
-            Swal.fire({
-                title: "Error!",
-                text: "Password's length should between 7 to 20",
-                icon: "error",
-                confirmButtonText: "OK"
-            })
-        }
-        else {
-            const response = await axios.post("http://localhost:3000/register", {
-                username: UserName,
-                userpassword: UserPassword,
-            })
-            if (response.data.isLoggedIn) {
-                dispatch(updateUserInfo(response.data));
-                // Cookies.set("username",response.data.username);
-                navigate("/");
-            }
-            else {
-                Swal.fire({
-                    title: 'Error!',
-                    text: "Error occured",
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                })
-            }
-            setUserName("");
-            setUserPassword("");
-            document.getElementById("username").value="";
-            document.getElementById("password").value="";
-        }
+      );
+      if (response.data.isLoggedIn) {
+        dispatch(updateUserInfo(response.data));
+        navigate("/");
+      } else {
+        Swal.fire({
+          title: "Error!",
+          text: "Error occured",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+      setUserName("");
+      setUserPassword("");
+      setisNameValid(false);
+      document.getElementById("username").value = "";
+      document.getElementById("password").value = "";
+    } else {
+      Swal.fire({
+        title: "Set a valid name",
+        timer: 2000,
+      });
     }
-    return (
-        <>
-            <div className="bg-amber-200 h-dvh flex flex-row justify-center">
-                <form className="flex flex-col w-100 ">
-                    <input type="text" id="username" placeholder="Username" className="bg-pink-400" onChange={inputter} />
-                    <input type="password" id="password" placeholder="Password" className="bg-pink-400" onChange={inputter} />
-                    <button type="submit" className="bg-gray-300" onClick={register}>Register</button>
-                </form>
+  }
+  function checkUsername(finalTypedName) {
+    if (finalTypedName != undefined && finalTypedName.length > 0) {
+      let firstFive = finalTypedName.substring(0, 6);
+      for (let i = 0; i < firstFive.length; i++) {
+        let char = firstFive[i];
+        if ((char >= "a" && char <= "z") || (char >= "A" && char <= "Z")) {
+          continue;
+        } else {
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+  useEffect(() => {
+    setisNameValid(false);
+    async function checkValidName() {
+      console.log(checkUsername(finalTypedName));
+      if (
+        finalTypedName.length >= 5 &&
+        finalTypedName.length <= 20 &&
+        checkUsername(finalTypedName)
+      ) {
+        const response = await axios.post(
+          import.meta.env.VITE_BACKEND_URL + "/validname",
+          {
+            username: finalTypedName,
+          }
+        );
+        if (response.data.isValid === true) {
+          setValidUserName(finalTypedName);
+          setisNameValid(true);
+        } else if (response.data.isValid === false) {
+          Swal.fire({
+            title: "Name already taken",
+            timer: 2000,
+          });
+          setisNameValid(false);
+        } else {
+          Swal.fire({
+            title: response.data.message,
+            timer: 2000,
+          });
+          setisNameValid(false);
+        }
+      }
+    }
+    checkValidName();
+  }, [finalTypedName]);
+  return (
+    <>
+      <div className="h-dvh flex justify-center items-center bg-gray-100">
+        <div className="bg-white shadow-lg rounded-xl p-6 w-[350px]">
+          <form className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <div className="flex flex-row items-center gap-2">
+                <Input
+                  type="text"
+                  id="username"
+                  placeholder="Username"
+                  onChange={inputter}
+                  maxLength={20}
+                />
+                <Badge
+                  className={
+                    isNameValid
+                      ? "bg-green-500 text-white dark:bg-green-600"
+                      : "bg-blue-500 text-white dark:bg-blue-600"
+                  }
+                >
+                  {isNameValid ? (
+                    <>
+                      <BadgeCheckIcon />
+                      valid
+                    </>
+                  ) : (
+                    <>
+                      <BadgeX />
+                      not valid
+                    </>
+                  )}
+                </Badge>
+              </div>
+              <span className="text-[12px] pl-1 text-gray-500">
+                First 5 letters should be A-Z or a-z with no space
+              </span>
             </div>
-        </>
-    )
+            <Input
+              type="password"
+              id="password"
+              placeholder="Password"
+              onChange={inputter}
+            />
+            <Button type="submit" onClick={register}>
+              Register
+            </Button>
+          </form>
+        </div>
+      </div>
+    </>
+  );
 }

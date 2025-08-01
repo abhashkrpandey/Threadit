@@ -6,6 +6,11 @@ import { useNavigate } from "react-router";
 import PostComponent from "./PostComponent";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useDispatch } from "react-redux";
+import {
+  addCommunityInArray,
+  removeCommunityInArray,
+} from "../reducers/loginSlice";
 import {
   Select,
   SelectContent,
@@ -28,10 +33,11 @@ import { Globe } from "lucide-react";
 import { Users } from "lucide-react";
 export default function SubThreaditContentBody() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [sortType, setsortType] = useState("recent");
   const [currentPage, setCurrentPage] = useState(parseInt(1));
   const [totalPages, settotalPages] = useState(parseInt(1));
-  const [hasJoined,sethasJoined]=useState(false);
+  const [hasJoined, sethasJoined] = useState(false);
   const SubThreaditDetails = useSelector(
     (state) => state.activity.currentActivity.SubThreaditDetails
   );
@@ -82,14 +88,57 @@ export default function SubThreaditContentBody() {
       }
     }
     postCollector();
-  }, [sortType, currentPage,SubThreaditDetails.subname]);
+  }, [sortType, currentPage, SubThreaditDetails.subname]);
+  async function joinGroup(event) {
+    event.stopPropagation();
+    const response = await axios.post(
+      import.meta.env.VITE_BACKEND_URL + "/joingroup",
+      {
+        communityid: SubThreaditDetails._id,
+      }
+    );
+    if (response.data.joined) {
+      sethasJoined(true);
+    } else if (response.data.joined === false) {
+      sethasJoined(false);
+    } else if (response.data.message) {
+      Swal.fire({
+        title: response.data.message,
+        icon: "error",
+      });
+    }
+  }
+  useEffect(() => {
+    if (hasJoined) {
+      console.log(SubThreaditDetails._id);
+      dispatch(addCommunityInArray({ value: SubThreaditDetails._id }));
+    } else {
+      console.log(SubThreaditDetails._id);
+      dispatch(removeCommunityInArray({ value: SubThreaditDetails._id }));
+    }
+  }, [hasJoined]);
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex flex-row justify-end">
-        <Button onClick={createfunc} variant={"ghost"} className={"border-1 border-black "}>
-          <Plus/>Create Post</Button>
-          <Button  variant={"ghost"} className={hasJoined?`bg-white text-black border-1 border-black `:`bg-blue-500`}>
-          {hasJoined?(<>Joined</>):(<>Join</>)}</Button>
+        <Button
+          onClick={createfunc}
+          variant={"ghost"}
+          className={"border-1 border-black "}
+        >
+          <Plus />
+          Create Post
+        </Button>
+        <Button
+          variant={"ghost"}
+          onClick={joinGroup}
+          className={
+            hasJoined
+              ? `bg-white text-black border-1 border-black `
+              : `bg-blue-500`
+          }
+        >
+          {hasJoined ? <>Joined</> : <>Join</>}
+        </Button>
       </div>
       <div className="grid grid-cols-5">
         {postArray.length == 0 ? (

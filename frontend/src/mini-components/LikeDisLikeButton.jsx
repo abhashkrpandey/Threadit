@@ -1,9 +1,5 @@
-// import emptylike from "../assets/emptylike.svg";
-// import filledlike from "../assets/filledlike.svg";
-// import emptydislike from "../assets/emptydislike.svg";
-// import filleddislike from "../assets/filleddislike.svg";
+
 import axios from "axios";
-// import Swal from "sweetalert2";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, ThumbsDown, LucideThumbsUp } from "lucide-react";
@@ -31,10 +27,6 @@ export default function LikeDisLikeButton(props) {
       sethasLiked(true);
       sethasdisLiked(false);
     } else if(response.data.likeCounted==false && response.data.message=="Already liked") {
-      // Swal.fire({
-      //   title: "already like counted",
-      //   icon: "error",
-      // });
       sethasLiked(false);
       setupvoteLive(upvoteLive-1);
     }
@@ -57,10 +49,6 @@ export default function LikeDisLikeButton(props) {
       sethasdisLiked(true);
       sethasLiked(false);
     } else if(response.data.dislikeCounted==false && response.data.message=="Already disliked"){
-      // Swal.fire({
-      //   title: "already disliked",
-      //   icon: "error",
-      // });
       sethasdisLiked(false);
       setdownvoteLive(downvoteLive-1);
     }
@@ -72,20 +60,10 @@ export default function LikeDisLikeButton(props) {
         onClick={likeFunc}
         className={"hover:bg-gray-300"}
       >
-        {/* <img
-          src={hasLiked ? filledlike : emptylike}
-          width={16}
-          height={16}
-        ></img> */}
         {hasLiked ? <ThumbsUp className="fill-orange-500" /> : <ThumbsUp />}
         {upvoteLive}
       </Button>
       <Button variant={"outline"} onClick={dislikeFunc} className={"hover:bg-gray-300"}>
-        {/* <img
-          src={hasdisLiked ? filleddislike : emptydislike}
-          width={16}
-          height={16}
-        ></img> */}
         {hasdisLiked ? (
           <ThumbsDown className="fill-orange-500" />
         ) : (

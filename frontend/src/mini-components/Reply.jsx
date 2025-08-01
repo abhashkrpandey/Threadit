@@ -2,6 +2,8 @@
 import axios from "axios";
 import { useState } from "react";
 import socket from "../socket";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 export default function Reply({ haveToReply, parentid, postid }) {
   const [replyText, setreplyText] = useState("");
   function inputter(event) {
@@ -39,20 +41,19 @@ export default function Reply({ haveToReply, parentid, postid }) {
     <>
       <div>
         {haveToReply && (
-          <div className="bg-gray-500 flex flex-col w-[100%]">
-            <textarea
+          <div className=" flex flex-col w-[100%]">
+            <Textarea
               id="replyArea"
-              className="bg-gray-500 focus:outline-none"
               placeholder="Reply"
               onChange={inputter}
-            ></textarea>
+            ></Textarea>
             <div className="flex flex-row-reverse gap-0.5">
-              <button className="bg-blue-600" onClick={addReplySocket}>
+              <Button className="bg-blue-600" onClick={addReplySocket}>
                 Comment
-              </button>
-              <button className="bg-blue-600" onClick={clearText}>
+              </Button>
+              <Button className="bg-blue-600" onClick={clearText}>
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         )}

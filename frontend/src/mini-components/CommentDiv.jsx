@@ -5,13 +5,22 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { useEffect } from "react";
 import EachComment from "./EachComment";
+import { Textarea } from "@/components/ui/textarea.jsx";
+import { Button } from "@/components/ui/button.jsx";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 export default function CommentDiv({ postid }) {
   const [commentText, setCommentText] = useState("");
   const [commentsArray, setcommentArray] = useState([]);
   const [sortType, setsortType] = useState("recent");
   function sortTypeFunc(event) {
-    console.log(event.target.value);
-    setsortType(event.target.value);
+    console.log(event);
+    setsortType(event);
   }
   useEffect(() => {
     socket.connect();
@@ -88,30 +97,34 @@ export default function CommentDiv({ postid }) {
   return (
     <>
       <div className="flex flex-row">
-        <div className="bg-gray-500 flex flex-col w-[100%]">
-          <textarea
+        <div className=" flex flex-col w-[100%]">
+          <Textarea
             id="commentArea"
-            className="bg-gray-500 focus:outline-none"
             placeholder="Join Conversation"
             onChange={inputter}
-          ></textarea>
+          ></Textarea>
           <div className="flex flex-row-reverse gap-0.5">
-            <button className="bg-blue-600" onClick={addCommentSocket}>
+            <Button className="bg-blue-600" onClick={addCommentSocket}>
               Comment
-            </button>
-            <button className="bg-blue-600" onClick={clearText}>
+            </Button>
+            <Button className="bg-blue-600" onClick={clearText}>
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       </div>
       <div className="flex flex-row">
         <div>
-          <select defaultValue="recent" onChange={sortTypeFunc}>
-            <option value="recent">Recent</option>
-            <option value="likes">Most Liked</option>
-            <option value="dislike">Most Disliked</option>
-          </select>
+         <Select defaultValue="recent" onValueChange={sortTypeFunc}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Sort By" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Recent</SelectItem>
+              <SelectItem value="likes">Most Liked</SelectItem>
+              <SelectItem value="dislike">Most Disliked</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex flex-col  gap-2">
           {commentsArray.map((comment) => {

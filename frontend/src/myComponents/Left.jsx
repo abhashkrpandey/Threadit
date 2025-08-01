@@ -1,12 +1,12 @@
 import { useState } from "react";
-import hamburger from "../assets/hamburger.svg";
-import cross from "../assets/cross.svg";
 import Community from "./Community";
 import { Button } from "@/components/ui/button.jsx";
 import { House } from 'lucide-react';
 import { useNavigate } from "react-router";
 import { Telescope } from 'lucide-react';
 import Cookies from "js-cookie";
+import { X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 export default function Left() {
   const [isOpen, setisOpen] = useState(true);
   const [width, setwidth] = useState("w-[15%]");
@@ -23,14 +23,9 @@ export default function Left() {
   return (
     <div className={`border-gray-300 border-r-2 h-screen ${width}`}>
       <div className="flex flex-row justify-end">
-        <button onClick={hamburgerfunc}>
-          <img
-            src={isOpen ? cross : hamburger}
-            width={35}
-            height={35}
-            className=" hover:border-black rounded-full border-1 border-gray-500 p-2"
-          ></img>
-        </button>
+        <Button onClick={hamburgerfunc} className={"rounded-full border-black"} variant={"outline"}>
+          {isOpen ? <X/> : <Menu/>}
+        </Button>
       </div>
       {isOpen ? (
         <div>

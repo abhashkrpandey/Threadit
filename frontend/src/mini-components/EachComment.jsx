@@ -1,13 +1,15 @@
 import LikeDislikeButton from "./LikeDisLikeButton.jsx";
-import comment from "../assets/comment.svg";
-import circleplus from "../assets/circleplus.svg";
-import minus from "../assets/minus.svg";
 import DateTime from "./DateTime.jsx";
 import Reply from "./Reply.jsx";
 import socket from "../socket";
 import { useState } from "react";
 import axios from "axios";
 import { useEffect } from "react";
+import { Dot } from "lucide-react";
+import { Button } from "@/components/ui/button.jsx";
+import { MessageCircle } from 'lucide-react';
+import { CirclePlus } from 'lucide-react';
+import { CircleMinus } from 'lucide-react';
 export default function EachComment({ props, postid }) {
   const [haveToReply, sethavetoReply] = useState(false);
   const [openReply, setopenReply] = useState(true);
@@ -59,68 +61,67 @@ export default function EachComment({ props, postid }) {
     }
   }
   return (
-    <div className="flex flex-col">
-      <div
-        className="flex flex-row"
-        style={{ marginLeft: `${props.depth * 20}px` }}
-      >
-        <div onClick={fetchReply}>
-          <img
-            src={openReply ? circleplus : minus}
-            width={16}
-            height={16}
-          ></img>
-        </div>
-        <div>
-          <div className="flex flex-col bg-amber-600">
-            <div>
-              {" "}
-              r/{props.userid.username}-
-              <DateTime date={props.updatedAt}></DateTime>
-            </div>
-            <div className="flex flex-col">
-              <div>{props.commentText}</div>
-            </div>
-            <div className="flex flex-row">
-              <LikeDislikeButton
-                downvote={props.downvote}
-                upvote={props.upvote}
-                postid={postid}
-                hasLiked={props.hasLiked}
-                hasdisLiked={props.hasdisLiked}
-                commentid={props._id}
-              ></LikeDislikeButton>
-              <div
-                className="flex flex-row hover:bg-gray-400 cursor-default "
-                onClick={replyBox}
-              >
-                <button>
-                  <img src={comment} width={16} height={16}></img>
-                </button>
-                Reply
-              </div>
-            </div>
+<div className="flex flex-col">
+  <div
+    className="flex gap-3 items-start"
+    style={{ marginLeft: `${props.depth * 20}px` }}
+  >
+    <div onClick={fetchReply} className="cursor-pointer mt-2">
+      <Button variant={"secondary"} className={"hover:bg-gray-500"}>{openReply ? <CirclePlus/> : <CircleMinus/>}</Button>
+    </div>
+
+    <div className="flex-1">
+      <div className="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 p-4 rounded-xl shadow transition hover:shadow-md">
+        <div className="text-sm text-gray-700 dark:text-gray-300 font-semibold mb-2  flex flex-row">
+          r/{props.userid.username}
+          <div className="font-normal ml-1 text-xs text-gray-500 dark:text-gray-400 flex flex-row">
+            <Dot/><DateTime date={props.updatedAt} />
           </div>
-          <div>
+        </div>
+
+        <div className="text-gray-800 dark:text-gray-100 mb-3 whitespace-pre-wrap">
+          {props.commentText}
+        </div>
+
+        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+          <LikeDislikeButton
+            downvote={props.downvote}
+            upvote={props.upvote}
+            postid={postid}
+            hasLiked={props.hasLiked}
+            hasdisLiked={props.hasdisLiked}
+            commentid={props._id}
+          />
+
+          <Button
+            onClick={replyBox} variant={"outline"}
+            className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition"
+          >
+            <MessageCircle/>
+            <span>Reply</span>
+          </Button>
+        </div>
+
+        {haveToReply && (
+          <div className="mt-3">
             <Reply
               haveToReply={haveToReply}
               parentid={props._id}
               postid={postid}
-            ></Reply>
+            />
           </div>
-        </div>
-      </div>
-      <div>
-        {replyArray.map((reply) => {
-          return (
-            <EachComment
-              key={reply._id}
-              props={reply}
-              postid={postid}
-            ></EachComment>
-          );
-        })}
+        )}
       </div>
     </div>
+  </div>
+
+  <div className="mt-3">
+    {replyArray.map((reply) => (
+      <EachComment key={reply._id} props={reply} postid={postid} />
+    ))}
+  </div>
+</div>
+
+
   );
 }

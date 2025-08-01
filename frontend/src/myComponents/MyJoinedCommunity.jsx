@@ -5,7 +5,10 @@ import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 export default function MyJoinedCommunityList() {
   const [communityList, setCommunityList] = useState([]);
-  const navigate=useNavigate();
+  const userJoinedCommunities = useSelector(
+    (state) => state.login.userinfo.userJoinedCommunities
+  );
+  const navigate = useNavigate();
   useEffect(() => {
     async function listCollector() {
       const response = await axios.post(
@@ -16,12 +19,20 @@ export default function MyJoinedCommunityList() {
       }
     }
     listCollector();
-  }, []);
+  }, [userJoinedCommunities]);
   return (
     <>
       <div className="flex flex-col">
         {communityList.map((ele) => (
-          <Button   variant="ghost" size="sm" key={ele._id.toString()} onClick={()=>(navigate(`/t/${ele.subname}`))}  className="hover:bg-gray-300">{ele.subname}</Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            key={ele._id.toString()}
+            onClick={() => navigate(`/t/${ele.subname}`)}
+            className="hover:bg-gray-300"
+          >
+            {ele.subname}
+          </Button>
         ))}
       </div>
     </>

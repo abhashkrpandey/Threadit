@@ -1,6 +1,5 @@
 import Navbar from "../myComponents/Navbar";
 import Left from "../myComponents/Left";
-import Right from "../myComponents/Right";
 import { useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -8,6 +7,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import  Cookies from "js-cookie";
 
 export default function CreateSubThreadit() {
   const userid = useSelector((state) => state.login.userinfo.userid);
@@ -88,7 +88,14 @@ export default function CreateSubThreadit() {
         text: "Properly fill  the details",
         icon: "error",
       });
-    } else {
+    }else if(Cookies.get("jwtToken")===undefined)
+      {
+        Swal.fire({
+          title:"You are either not  logged/registered",
+          icon:"error"
+        })
+      } 
+    else {
       const response = await axios.post(
         import.meta.env.VITE_BACKEND_URL + "/createsub",
         {
@@ -175,7 +182,9 @@ export default function CreateSubThreadit() {
             </label>
           </div>
           <div className="flex flex-col">
-            <div className="text-xl">Select topics Related To this community</div>
+            <div className="text-xl">
+              Select topics Related To this community
+            </div>
             <div className=" grid grid-cols-7 w-200">
               {topicsArray.map((topic) => {
                 return (

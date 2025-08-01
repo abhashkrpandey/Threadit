@@ -39,6 +39,33 @@ app.use(
 app.use(cookieparser());
 app.use(express.json());
 mongoose.connect(process.env.MONGOURL);
+app.post("/validname", async function (req, res) {
+  const username = req.body.username;
+  try {
+
+    const user = await UserModel.findOne({ username: username });
+    if (user === null) {
+      res.json({
+        isValid: true
+      })
+    }
+    else {
+      res.json(
+        {
+          isValid: false
+        }
+      )
+    }
+  }
+  catch (err) {
+    console.log(err.message);
+    res.json(
+      {
+        message: "Backend Error happened"
+      }
+    )
+  }
+})
 app.post("/authenticator", authenticator, (req, res) => {
   res.json({
     isLoggedIn: true,
@@ -95,6 +122,7 @@ app.post("/register", async function (req, res) {
         isLoggedIn: true,
         username: username,
         userid: userid,
+        userJoinedCommunities: user.communitiesjoined
       });
     } else {
       console.log("Internal Error");
@@ -136,6 +164,7 @@ app.post("/login", async function (req, res) {
         isLoggedIn: true,
         username: isThere.username,
         userid: userid,
+        userJoinedCommunities: isThere.communitiesjoined
       });
     } else {
       res.status(500).json({
@@ -150,16 +179,25 @@ app.post("/createpost", authenticator, async function (req, res) {
   const postbody = req.body.postbody;
   const communityId = req.body.communityId;
   try {
-    const post = new PostModel({
-      userid: userid,
-      posttitle: posttitle,
-      postbody: postbody,
-      communityId: communityId,
-    });
-    await post.save();
-    res.json({
-      created: true,
-    });
+    const userJoined = await UserModel.findOne({ _id: userid }, { communitiesjoined: 1 });
+    const hasJoined = userJoined.communitiesjoined.some((id) => id.equals(communityId));
+    if (hasJoined === true) {
+      const post = new PostModel({
+        userid: userid,
+        posttitle: posttitle,
+        postbody: postbody,
+        communityId: communityId,
+      });
+      await post.save();
+      res.json({
+        created: true,
+      });
+    }
+    else {
+      res.json({
+        message: "you have not joined the community"
+      })
+    }
   } catch (err) {
     res.json({
       created: false,
@@ -233,8 +271,8 @@ app.get("/posts", authenticator, async function (req, res) {
     } else if (sortType == "dislike") {
       sortObject = { downvote: -1 };
     }
-    const userJoinedCommunities=await UserModel.findOne({_id:userid},{_id:0,communitiesjoined:1});
-    const joinedCommunity=userJoinedCommunities.communitiesjoined.some((id)=>id.equals(new mongoose.Types.ObjectId(communityId)));
+    const userJoinedCommunities = await UserModel.findOne({ _id: userid }, { _id: 0, communitiesjoined: 1 });
+    const joinedCommunity = userJoinedCommunities.communitiesjoined.some((id) => id.equals(new mongoose.Types.ObjectId(communityId)));
     console.log(userJoinedCommunities.communitiesjoined);
     console.log(communityId);
     console.log(joinedCommunity);
@@ -267,7 +305,7 @@ app.get("/posts", authenticator, async function (req, res) {
         isThereAnyPost: true,
         totalPages: totalPages,
         posts: modifiedposts,
-        hasJoined:joinedCommunity
+        hasJoined: joinedCommunity
       });
     } else {
       res.json({
@@ -908,6 +946,3 @@ io.on("connection", (socket) => {
 httpServer.listen(process.env.BACKEND_PORT, () => {
   console.log(`server running at ${process.env.BACKEND_PORT}`);
 });
-// app.listen(process.env.BACKEND_PORT, () => {
-//   console.log(`server running at ${process.env.BACKEND_PORT}`);
-// });

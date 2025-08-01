@@ -16,6 +16,7 @@ import SubThreadit from "./pages/SubThreadit";
 import PostPage from "./myComponents/PostPage";
 import Explore from "./pages/Explore";
 import UserProfile from "./pages/UserProfile";
+import Swal from "sweetalert2";
 
 export default function App() {
   axios.defaults.withCredentials = true;
@@ -29,8 +30,15 @@ export default function App() {
         dispatch(updateUserInfo(response.data));
       }
     }
-    authenticator();
-  }, []);
+    if (navigator.onLine) {
+      authenticator();
+    } else {
+      Swal.fire({
+        title: "you are offline",
+        timer: 2000,
+      });
+    }
+  }, [navigator.onLine]);
   return (
     <Routes>
       <Route path="/" element={<Home></Home>}></Route>
@@ -40,7 +48,10 @@ export default function App() {
       <Route path="/create" element={<CreatePost></CreatePost>}></Route>
       <Route path="/inside" element={<Inside></Inside>}></Route>
       <Route path="/explore" element={<Explore></Explore>}></Route>
-      <Route path="/createsub" element={<CreateSubThreadit></CreateSubThreadit>}></Route>
+      <Route
+        path="/createsub"
+        element={<CreateSubThreadit></CreateSubThreadit>}
+      ></Route>
       <Route path="/t/:subname" element={<SubThreadit></SubThreadit>}></Route>
       <Route path="/post/:postid" element={<PostPage></PostPage>}></Route>
       <Route path="/u/:username" element={<UserProfile></UserProfile>}></Route>

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const {ObjectId} =mongoose;
 
 const SubRedditSchema = new mongoose.Schema({
-    subname: { type: String, required: true },
+    subname: { type: String, required: true,unique:true},
     subdescription: { type: String, require: true },
     accessiblity: { type: String, required: true },
     topics: { type: [String], required: true },
