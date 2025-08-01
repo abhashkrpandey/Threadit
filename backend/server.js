@@ -139,6 +139,14 @@ app.post("/register", async function (req, res) {
   }
   console.log(username, userpassword);
 });
+app.post('/logout', (req, res) => {
+  res.clearCookie("jwttoken", {
+    path: '/',
+    sameSite: 'None',
+    secure: true
+  });
+  res.status(200).json({ message: 'Logged out' });
+});
 app.post("/login", async function (req, res) {
   const username = req.body.username;
   const userpassword = req.body.userpassword;

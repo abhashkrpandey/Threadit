@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Spool } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { updateUserInfo } from "../reducers/loginSlice";
+import axios from "axios";
 export default function Navbar() {
   const dispatch = useDispatch();
   const userinfo = useSelector((state) => state.login.userinfo);
@@ -41,9 +42,11 @@ export default function Navbar() {
   function userProfileOpen() {
     navigate(`/u/${username}`);
   }
-  function logoutFunc() {
-    Cookies.remove("jwttoken");
-    dispatch(
+  async function logoutFunc() {
+    const response =await axios.post(import.meta.env.VITE_BACKEND_URL+"/logout");
+    if(response.data.message==='Logged out')
+    {
+       dispatch(
       updateUserInfo({
         username: null,
         isLoggedIn: false,
@@ -52,6 +55,7 @@ export default function Navbar() {
       })
     );
     window.location.reload();
+    }
   }
   return (
     <>

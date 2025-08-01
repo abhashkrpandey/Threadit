@@ -20,6 +20,7 @@ import Swal from "sweetalert2";
 
 export default function App() {
   axios.defaults.withCredentials = true;
+  axios.defaults.baseURL="https://threadit-155p.onrender.com"
   const dispatch = useDispatch();
   useEffect(() => {
     async function authenticator() {
