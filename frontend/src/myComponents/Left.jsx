@@ -7,10 +7,12 @@ import { Telescope } from 'lucide-react';
 import Cookies from "js-cookie";
 import { X } from 'lucide-react';
 import { Menu } from 'lucide-react';
+import { useSelector } from "react-redux";
 export default function Left() {
   const [isOpen, setisOpen] = useState(true);
   const [width, setwidth] = useState("w-[15%]");
   const navigate = useNavigate();
+  const isLoggedIn = useSelector((state) => state.login.userinfo.isLoggedIn);
   function hamburgerfunc() {
     if (width) {
       setisOpen(false);
@@ -33,7 +35,7 @@ export default function Left() {
             <Button variant="ghost" size="sm" onClick={() => navigate("/")} className={"not-even:hover:bg-gray-300"}>
              <House/> Home
             </Button>
-            {Cookies.get("jwttoken") !== undefined ? (
+            {isLoggedIn ? (
               <Button
                 variant="ghost" size="sm"
                 onClick={() => navigate("/explore")} className={"hover:bg-gray-300"}
