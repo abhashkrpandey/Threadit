@@ -19,6 +19,7 @@ dotenv.config();
 const allowedOrigins = [
   "http://localhost:5173",
   "https://github.com/login/oauth/authorize",
+  "https://threadit-155p.onrender.com"
 ];
 
 const httpServer = createServer(app);
@@ -943,6 +944,7 @@ io.on("connection", (socket) => {
     // console.log(socket.id+"left"+args.room);
   });
 });
-httpServer.listen(process.env.BACKEND_PORT, () => {
-  console.log(`server running at ${process.env.BACKEND_PORT}`);
+const PORT = process.env.PORT || process.env.BACKEND_PORT;
+httpServer.listen(PORT, () => {
+  console.log(`server running at ${PORT}`);
 });
