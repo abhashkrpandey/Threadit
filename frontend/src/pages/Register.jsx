@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { BadgeCheckIcon, BadgeX } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 function useDebounce(username, delay = 300) {
   const [name, setName] = useState("");
   useEffect(() => {
@@ -24,6 +25,7 @@ function useDebounce(username, delay = 300) {
 export default function Register() {
   const [UserName, setUserName] = useState("");
   const [ValidUserName, setValidUserName] = useState("");
+   const [Loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const [UserPassword, setUserPassword] = useState("");
   const finalTypedName = useDebounce(UserName);
@@ -46,6 +48,7 @@ export default function Register() {
         confirmButtonText: "OK",
       });
     } else if (isNameValid === true) {
+      setLoading(true);
       const response = await axios.post(
         import.meta.env.VITE_BACKEND_URL + "/register",
         {
@@ -53,6 +56,7 @@ export default function Register() {
           userpassword: UserPassword,
         }
       );
+      setLoading(false);
       if (response.data.isLoggedIn) {
         dispatch(updateUserInfo(response.data));
         navigate("/");
@@ -170,8 +174,15 @@ export default function Register() {
               placeholder="Password"
               onChange={inputter}
             />
-            <Button type="submit" onClick={register}>
-              Register
+            <Button type="submit" onClick={register} disabled={Loading ? true : false}>
+              {Loading ? (
+                <>
+                  <Loader2Icon className="animate-spin" />
+                  Please wait...
+                </>
+              ) : (
+                <>Register</>
+              )}
             </Button>
           </form>
         </div>

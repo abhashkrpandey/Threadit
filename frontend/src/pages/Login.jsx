@@ -7,12 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
 import { updateUserInfo } from "../reducers/loginSlice";
+import { Loader2Icon } from "lucide-react";
 export default function Login() {
   const [UserNameLogin, setUserNameLogin] = useState("");
   const [UserPasswordLogin, setUserPasswordLogin] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
- 
+  const [Loading, setLoading] = useState(false);
+
   function inputter(e) {
     if (e.target.id === "username") {
       setUserNameLogin(e.target.value);
@@ -40,10 +42,15 @@ export default function Login() {
         confirmButtonText: "OK",
       });
     } else {
-      const response = await axios.post(import.meta.env.VITE_BACKEND_URL+"/login", {
-        username: UserNameLogin,
-        userpassword: UserPasswordLogin,
-      });
+      setLoading(true);
+      const response = await axios.post(
+        import.meta.env.VITE_BACKEND_URL + "/login",
+        {
+          username: UserNameLogin,
+          userpassword: UserPasswordLogin,
+        }
+      );
+      setLoading(false);
       if (response.data.isLoggedIn) {
         dispatch(updateUserInfo(response.data));
         // Cookies.set("username", response.data.username);
@@ -64,30 +71,40 @@ export default function Login() {
   }
   return (
     <>
-<div className="h-dvh flex justify-center items-center bg-gray-100">
-  <div className="bg-white shadow-md rounded-xl p-6 w-[320px]">
-    <form className="flex flex-col gap-4">
-      <Input
-        type="text"
-        id="username"
-        placeholder="Username"
-        className="px-3 py-2 rounded text-black placeholder-gray-400"
-        onChange={inputter}
-      />
-      <Input
-        type="password"
-        id="password"
-        placeholder="Password"
-        className="px-3 py-2 rounded text-black placeholder-gray-400"
-        onChange={inputter}
-      />
-      <Button type="submit" onClick={login}>
-        Login
-      </Button>
-    </form>
-  </div>
-</div>
-
+      <div className="h-dvh flex justify-center items-center bg-gray-100">
+        <div className="bg-white shadow-md rounded-xl p-6 w-[320px]">
+          <form className="flex flex-col gap-4">
+            <Input
+              type="text"
+              id="username"
+              placeholder="Username"
+              className="px-3 py-2 rounded text-black placeholder-gray-400"
+              onChange={inputter}
+            />
+            <Input
+              type="password"
+              id="password"
+              placeholder="Password"
+              className="px-3 py-2 rounded text-black placeholder-gray-400"
+              onChange={inputter}
+            />
+            <Button
+              type="submit"
+              onClick={login}
+              disabled={Loading ? true : false}
+            >
+              {Loading ? (
+                <>
+                  <Loader2Icon className="animate-spin" />
+                  Please wait...
+                </>
+              ) : (
+                <>Login</>
+              )}
+            </Button>
+          </form>
+        </div>
+      </div>
     </>
   );
 }
