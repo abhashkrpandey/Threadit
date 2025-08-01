@@ -11,6 +11,7 @@ import  Cookies from "js-cookie";
 
 export default function CreateSubThreadit() {
   const userid = useSelector((state) => state.login.userinfo.userid);
+    const isLoggedIn = useSelector((state) => state.login.userinfo.isLoggedIn);
   const [subname, setsubname] = useState("");
   const [subdescription, setsubdescription] = useState("");
   const [accessiblity, setaccessiblity] = useState("public");
@@ -88,7 +89,7 @@ export default function CreateSubThreadit() {
         text: "Properly fill  the details",
         icon: "error",
       });
-    }else if(Cookies.get("jwtToken")===undefined)
+    }else if(isLoggedIn===false)
       {
         Swal.fire({
           title:"You are either not  logged/registered",

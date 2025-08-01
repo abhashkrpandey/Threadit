@@ -2,6 +2,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import { useSelector } from "react-redux";
 import PostComponent from "./PostComponent";
 import {
   Select,
@@ -24,6 +25,7 @@ export default function Middle() {
   const [sortType, setsortType] = useState("recent");
   const [currentPage, setCurrentPage] = useState(parseInt(1));
   const [totalPages, settotalPages] = useState(parseInt(1));
+    const isLoggedIn = useSelector((state) => state.login.userinfo.isLoggedIn);
   console.log(currentPage);
   function sortTypeFunc(event) {
     // console.log(event);
@@ -61,7 +63,7 @@ export default function Middle() {
       }
     }
     // console.log(Cookies.get("jwttoken"));
-    if (Cookies.get("jwttoken") === undefined) {
+    if (isLoggedIn=== false) {
       feedPostFetcher();
     } else {
       feedPostFetcherAuthenticated();

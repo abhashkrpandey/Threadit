@@ -28,6 +28,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useSelector } from "react-redux";
 export default function UserProfile() {
   const params = useParams();
   const username = params.username;
@@ -35,8 +36,10 @@ export default function UserProfile() {
   const [currentValue, setcurrentValue] = useState("likes");
   const [currentDivs, setcurrentDivs] = useState([]);
   const navigate = useNavigate();
+  const isLoggedIn = useSelector((state) => state.login.userinfo.isLoggedIn);
+
   function postPageOpenFunc(id) {
-    if (Cookies.get("jwttoken") === undefined) {
+    if (isLoggedIn === false) {
       Swal.fire({
         title: "You are either not logged/registered",
         icon: "warning",

@@ -5,6 +5,7 @@ import LikeDisLikeButton from "../mini-components/LikeDisLikeButton";
 import BookMark from "../mini-components/BookMark";
 import DateTime from "../mini-components/DateTime";
 import Cookies from "js-cookie";
+import { useSelector } from "react-redux";
 import { Dot } from "lucide-react";
 import {
   Card,
@@ -17,10 +18,11 @@ import {
 } from "@/components/ui/card";
 import Swal from "sweetalert2";
 export default function PostComponent({ props, isInsideSubreddit }) {
+    const isLoggedIn = useSelector((state) => state.login.userinfo.isLoggedIn);
   // console.log(props);
   const navigate = useNavigate();
   function postPageOpenFunc() {
-    if (Cookies.get("jwttoken") === undefined) {
+    if (isLoggedIn === false) {
       Swal.fire({
         title: "You are either not logged/registered",
         icon:"warning"
