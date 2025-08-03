@@ -13,6 +13,12 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { default: mongoose } = require("mongoose");
 const CommentModel = require("./database/CommentModel");
+const cron = require('node-cron');
+
+console.log("cronnnnn");
+cron.schedule('* */10 * * * *', () => {
+  console.log('running a task every minute');
+});
 
 const app = express();
 dotenv.config();
