@@ -19,11 +19,10 @@ export default function CommentDiv({ postid }) {
   const [commentsArray, setcommentArray] = useState([]);
   const [sortType, setsortType] = useState("recent");
   function sortTypeFunc(event) {
-    console.log(event);
+    // console.log(event);
     setsortType(event);
   }
   useEffect(() => {
-    socket.connect();
     socket.on("connect", socketIdPrinter);
     socket.on("connect_error", socketError);
     socket.on(`commentAdded${postid}`, commentAdded);
@@ -31,7 +30,6 @@ export default function CommentDiv({ postid }) {
       socket.off("connect", socketIdPrinter);
       socket.off("connect_error", socketError);
       socket.off(`commentAdded${postid}`, commentAdded);
-      socket.disconnect();
     };
   }, []);
   const commentAdded = (args) => {

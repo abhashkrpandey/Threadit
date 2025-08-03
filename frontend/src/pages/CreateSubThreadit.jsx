@@ -55,7 +55,7 @@ export default function CreateSubThreadit() {
       if (topics.length < 3) {
         if (!topics.includes(valueDerived)) {
           settopics([...topics, valueDerived]);
-          console.log();
+          // console.log();
           document.getElementById(idDerivred).classList.add("bg-gray-400");
         } else if (topics.includes(valueDerived)) {
           let newtopics = topics.filter((ele) => ele !== valueDerived);

@@ -6,7 +6,7 @@ import DemoUser from "./pages/DemoUser";
 import Inside from "./pages/Inside";
 import "react-tooltip/dist/react-tooltip.css";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import "./App.css";
 import axios from "axios";
 import CreatePost from "./pages/CreatePost";
@@ -16,12 +16,15 @@ import SubThreadit from "./pages/SubThreadit";
 import PostPage from "./myComponents/PostPage";
 import Explore from "./pages/Explore";
 import UserProfile from "./pages/UserProfile";
+import Cookies from "js-cookie";
+import socket from "./socket";
 import Swal from "sweetalert2";
 
 export default function App() {
   axios.defaults.withCredentials = true;
-  axios.defaults.baseURL="https://threadit-155p.onrender.com"
+  axios.defaults.baseURL = "https://threadit-155p.onrender.com";
   const dispatch = useDispatch();
+  const isLoggedIn = useSelector((state) => state.login.userinfo.isLoggedIn);
   useEffect(() => {
     async function authenticator() {
       const response = await axios.post(
@@ -40,6 +43,33 @@ export default function App() {
       });
     }
   }, [navigator.onLine]);
+  useEffect(() => {
+    const token = Cookies.get("jwttoken");
+    console.log(token);
+
+    if (token) {
+      if (!socket.connected) {
+        socket.auth = { token: token }; 
+        socket.connect();
+      }
+
+      socket.on("connect", () => {
+      });
+
+      socket.on("connect_error", (err) => {
+      });
+    } else {
+      if (socket.connected) {
+        socket.disconnect();
+      }
+    }
+
+    return () => {
+      if (socket.connected) {
+        socket.disconnect();
+      }
+    };
+  }, [isLoggedIn]);
   return (
     <Routes>
       <Route path="/" element={<Home></Home>}></Route>

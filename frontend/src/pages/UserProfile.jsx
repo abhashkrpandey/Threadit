@@ -85,7 +85,7 @@ export default function UserProfile() {
         }
       );
       if (response.data.isValidUser) {
-        console.log(response.data.userinfo);
+        // console.log(response.data.userinfo);
         setuserInfo(response.data.userinfo);
       } else if (response.data.isValidUser == false) {
         Swal.fire({

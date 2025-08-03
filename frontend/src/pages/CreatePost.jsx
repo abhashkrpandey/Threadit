@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import NotLoggedIn from "./NotLoggedIn";
 export default function CreatePost() {
     const userid = useSelector((state) => (state.login.userinfo.userid));
-    console.log(userid);
+    // console.log(userid);
     return (
         <>
             <div>

@@ -60,10 +60,10 @@ export default function SubThreaditContentBody() {
   const day = date.getDate();
   const year = date.getFullYear();
 
-  console.log(`${month} ${day},${year}`);
+  // console.log(`${month} ${day},${year}`);
   const [postArray, setPostArray] = useState([]);
   function sortTypeFunc(event) {
-    console.log(event);
+    // console.log(event);
     setsortType(event);
   }
   function createfunc() {
@@ -110,10 +110,10 @@ export default function SubThreaditContentBody() {
   }
   useEffect(() => {
     if (hasJoined) {
-      console.log(SubThreaditDetails._id);
+      // console.log(SubThreaditDetails._id);
       dispatch(addCommunityInArray({ value: SubThreaditDetails._id }));
     } else {
-      console.log(SubThreaditDetails._id);
+      // console.log(SubThreaditDetails._id);
       dispatch(removeCommunityInArray({ value: SubThreaditDetails._id }));
     }
   }, [hasJoined]);

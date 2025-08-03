@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 export default function PostPageComponent(props) {
+  console.log(props.post._id);
   const [isOpen, setisOpen] = useState(false);
   function openComment() {
     if (isOpen === false) setisOpen(true);

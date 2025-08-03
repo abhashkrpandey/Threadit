@@ -284,9 +284,9 @@ app.get("/posts", authenticator, async function (req, res) {
     }
     const userJoinedCommunities = await UserModel.findOne({ _id: userid }, { _id: 0, communitiesjoined: 1 });
     const joinedCommunity = userJoinedCommunities.communitiesjoined.some((id) => id.equals(new mongoose.Types.ObjectId(communityId)));
-    console.log(userJoinedCommunities.communitiesjoined);
-    console.log(communityId);
-    console.log(joinedCommunity);
+    // console.log(userJoinedCommunities.communitiesjoined);
+    // console.log(communityId);
+    // console.log(joinedCommunity);
     const total = await PostModel.countDocuments({ communityId: communityId });
     const totalPages = Math.ceil(total / pageSize);
     const skip = (pageNumber - 1) * pageSize;
@@ -427,7 +427,7 @@ app.post("/dislike", authenticator, async function (req, res) {
       );
       toggle = true;
     }
-    console.log(post);
+    // console.log(post);
     if (post.downvoterId.some((id) => id.equals(userid))) {
       res.json({
         dislikeCounted: false,
@@ -464,7 +464,7 @@ app.post("/dislike", authenticator, async function (req, res) {
       );
       toggle = true;
     }
-    console.log(post);
+    // console.log(post);
     if (post.downvoterId.some((id) => id.equals(userid))) {
       await PostModel.updateOne({ _id: postid }, { $inc: { downvote: -1 }, $pull: { downvoterId: userid } });
       res.json({
@@ -498,7 +498,7 @@ app.post("/bookmarkpost", authenticator, async function (req, res) {
     { _id: postid },
     { _id: 0, bookmarkerId: 1 }
   );
-  console.log(post);
+  // console.log(post);
   if (post.bookmarkerId.some((id) => id.equals(userid))) {
     const update = await PostModel.updateOne(
       { _id: postid },
@@ -584,7 +584,7 @@ app.post("/addcomment", authenticator, async function (req, res) {
     commentText: comment,
     depth: depth,
   });
-  console.log(commentAdded);
+  // console.log(commentAdded);
   res.json({
     isCommentAdded: true,
     commentText: commentAdded.commentText,
@@ -639,7 +639,7 @@ app.post("/fetchcomments", authenticator, async function (req, res) {
 app.get("/feed", async function (req, res) {
   const pageSize = 5;
   const pageNumber = parseInt(req.query.pageNumber) || 1;
-  console.log(pageNumber);
+  // console.log(pageNumber);
   try {
     const communityIds = await SubRedditModel.find()
       .sort({ postCount: -1 })
@@ -690,7 +690,7 @@ app.get("/feedauthenticated", authenticator, async function (req, res) {
   try {
     const userid = req.decoded.userid;
     const sortType = req.query.sortType;
-    console.log(sortType);
+    // console.log(sortType);
     let sortObject;
     if (sortType == "recent") {
       sortObject = { createdAt: -1 };
@@ -904,7 +904,7 @@ app.post("/uservalid", authenticator, async function (req, res) {
 })
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
-
+  console.log(token);
   jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
     if (err) {
       return next(new Error("Authentication error"));
@@ -947,11 +947,11 @@ io.on("connection", (socket) => {
   });
   socket.on("joinRoomOfComment", (args) => {
     socket.join(args.room);
-    // console.log(socket.id+"joined"+args.room);
+     console.log(socket.id+"joined"+args.room);
   });
   socket.on("leaveRoomOfComment", (args) => {
     socket.leave(args.room);
-    // console.log(socket.id+"left"+args.room);
+     console.log(socket.id+"left"+args.room);
   });
 });
 const PORT = process.env.PORT || process.env.BACKEND_PORT;

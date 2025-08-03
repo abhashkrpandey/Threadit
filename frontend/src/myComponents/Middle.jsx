@@ -26,7 +26,7 @@ export default function Middle() {
   const [currentPage, setCurrentPage] = useState(parseInt(1));
   const [totalPages, settotalPages] = useState(parseInt(1));
     const isLoggedIn = useSelector((state) => state.login.userinfo.isLoggedIn);
-  console.log(currentPage);
+  // console.log(currentPage);
   function sortTypeFunc(event) {
     // console.log(event);
     setsortType(event);

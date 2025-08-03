@@ -98,7 +98,7 @@ export default function Register() {
   useEffect(() => {
     setisNameValid(false);
     async function checkValidName() {
-      console.log(checkUsername(finalTypedName));
+      // console.log(checkUsername(finalTypedName));
       if (
         finalTypedName.length >= 5 &&
         finalTypedName.length <= 20 &&
