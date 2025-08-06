@@ -28,9 +28,11 @@ export default function Navbar() {
   const userinfo = useSelector((state) => state.login.userinfo);
   const [isLoggedIn, setisLoggedIn] = useState(false);
   const [username, setusername] = useState("");
+  const [useravatar,setuseravatar] =useState(null);
   useEffect(() => {
     setisLoggedIn(userinfo.isLoggedIn);
     setusername(userinfo.username);
+    setuseravatar(userinfo.useravatar);
   }, [userinfo]);
   const navigate = useNavigate();
   function loginfunc() {
@@ -51,6 +53,7 @@ export default function Navbar() {
         username: null,
         isLoggedIn: false,
         userid: null,
+        useravatar:null,
         userJoinedCommunities: [],
       })
     );
@@ -103,7 +106,7 @@ export default function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" />
+                  <AvatarImage src={useravatar===null?"https://github.com/shadcn.png":useravatar} />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>

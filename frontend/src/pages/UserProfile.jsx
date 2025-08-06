@@ -14,6 +14,7 @@ import DateTime from "../mini-components/DateTime";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dot } from "lucide-react";
 import Cookies from "js-cookie";
+import { Camera } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -28,7 +29,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { updateUserInfo } from "../reducers/loginSlice";
+
+
 export default function UserProfile() {
   const params = useParams();
   const username = params.username;
@@ -36,7 +52,13 @@ export default function UserProfile() {
   const [currentValue, setcurrentValue] = useState("likes");
   const [currentDivs, setcurrentDivs] = useState([]);
   const navigate = useNavigate();
+  const [avatar, setavatar] = useState([]);
   const isLoggedIn = useSelector((state) => state.login.userinfo.isLoggedIn);
+  const [isLoading, setisLoading] = useState(false);
+  const dispatch =useDispatch();
+  const useravatar=useSelector((state) => state.login.userinfo.useravatar);
+
+  const [errorMessage, seterrorMessage] = useState("");
 
   function postPageOpenFunc(id) {
     if (isLoggedIn === false) {
@@ -48,6 +70,10 @@ export default function UserProfile() {
       navigate(`/post/${id.toString()}`);
     }
   }
+  // useEffect(()=>
+  //   {
+  //     window.location.reload();
+  //   },[]);
   useEffect(() => {
     setcurrentDivs([]);
     if (userinfo && userinfo[currentValue]) {
@@ -101,6 +127,66 @@ export default function UserProfile() {
     }
     checker();
   }, []);
+  async function avatarChanger() {
+    if (avatar.length == 0) {
+      seterrorMessage("No file uploaded");
+    }
+    if (!avatar.type.startsWith("image/")) {
+      seterrorMessage("only images are allowed");
+      document.getElementById("avatar").value = "";
+    }
+
+    const maxSize = 1 * 1024* 1024;
+    if (avatar.size > maxSize) {
+      seterrorMessage("Avatar size exceeds 1MB!");
+      document.getElementById("avatar").value = "";
+    } else {
+      const formData = new FormData();
+      formData.append("avatar", avatar);
+      try {
+        setisLoading(true);
+        const response = await axios.post(
+          import.meta.env.VITE_BACKEND_URL + "/uploadavatar",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        setisLoading(false);
+        document.getElementById("avatar").value = "";
+        setavatar([]);
+        if (response.data.isSaved) {
+          dispatch( updateUserInfo(
+          { useravatar: response.data.useravatar }
+          ))
+          Swal.fire({
+            title: "avatar changed",
+            timer: 2000,
+          });
+        } else if (response.data.isSaved === false) {
+          Swal.fire({
+            title: "avatar not changed",
+            timer: 2000,
+          });
+        } else if (response.data.message) {
+          Swal.fire({
+            title: response.data.message,
+            timer: 2000,
+          });
+        }
+      } catch (err) {
+        Swal.fire({
+          title: err.message,
+          icon: "error",
+        });
+      }
+    }
+  }
+  async function inputer(event) {
+    setavatar(event.target.files[0]);
+  }
   return (
     <>
       <div className="min-h-screen bg-muted">
@@ -109,15 +195,61 @@ export default function UserProfile() {
         <div className="flex flex-row  gap-6">
           <Left />
 
-          <div className="flex flex-col gap-6 w-full max-w-2xl">
+          <div className="flex flex-col gap-6 w-full max-w-2xl shadow-none">
             {userinfo.username && (
-              <div className="flex items-center gap-4 bg-white rounded-xl shadow-sm p-4">
-                <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" />
-                  <AvatarFallback>
-                    {userinfo.username.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+              <div className="flex items-center gap-4  rounded-xl  shadow-none p-4">
+                <Dialog>
+                  <form>
+                    <DialogTrigger asChild>
+                      <Avatar className={"w-[50px] h-[50px]"}>
+                        <AvatarImage
+                          src={
+                            userinfo.useravatar === null
+                              ? "https://github.com/shadcn.png"
+                              : useravatar
+                          }
+                        />
+                        <AvatarFallback>
+                          {userinfo.username.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Change Avatar</DialogTitle>
+                        <DialogDescription>
+                          Make sure image is less or equal to 1MB
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4">
+                        <div className="grid gap-3">
+                          <Label htmlFor="name-1">Image</Label>
+                          {errorMessage.length < 1 ? (
+                            <></>
+                          ) : (
+                            <div className="text-red-600 text-sm">{errorMessage}</div>
+                          )}
+                          <Input
+                            id="avatar"
+                            type="file"
+                            onChange={inputer}
+                            onClick={()=>{seterrorMessage("")}}
+                          ></Input>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline" onClick={()=>{seterrorMessage("");setavatar([])}}>Cancel</Button>
+                        </DialogClose>
+                        <div>
+                          <Button onClick={avatarChanger}>
+                            {isLoading ? <>Saving...</> : <>Save</>}
+                          </Button>
+                        </div>
+                      </DialogFooter>
+                    </DialogContent>
+                  </form>
+                </Dialog>
 
                 <div>
                   <div className="text-lg font-semibold">

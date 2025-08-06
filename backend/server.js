@@ -14,12 +14,11 @@ const { Server } = require("socket.io");
 const { default: mongoose } = require("mongoose");
 const CommentModel = require("./database/CommentModel");
 const cron = require('node-cron');
+const multer = require("multer");
+const storage = require("./middlewares/multer");
+const uploadOnCloudinary = require("./utils/cloudinary");
 
-console.log("cronnnnn");
-cron.schedule('* */10 * * * *', () => {
-  console.log('running a task every minute');
-});
-
+const upload = multer({ storage: storage });
 const app = express();
 dotenv.config();
 const allowedOrigins = [
@@ -46,6 +45,35 @@ app.use(
 app.use(cookieparser());
 app.use(express.json());
 mongoose.connect(process.env.MONGOURL);
+app.post("/uploadavatar", upload.single("avatar"), authenticator, async function (req, res) {
+  const localpath = req.file.path;
+  const userid = req.decoded.userid;
+  const url = await uploadOnCloudinary(localpath,"avatar");
+  if (url !== null) {
+    try {
+      const updateAvatar = await UserModel.updateOne({ _id: userid }, { $set: { useravatar: url } });
+      if (updateAvatar.modifiedCount==1) {
+        res.json({
+          useravatar:url,
+          isSaved: true
+        })
+      }
+      else {
+        res.json({
+          isSaved: false
+        })
+      }
+    }
+    catch (err) {
+      res.json({
+        isSaved: false
+      })
+    }
+  }
+  else if (url === null) {
+    return res.json({ isSaved: false, message: 'Upload Failed' });
+  }
+});
 app.post("/validname", async function (req, res) {
   const username = req.body.username;
   try {
@@ -73,12 +101,24 @@ app.post("/validname", async function (req, res) {
     )
   }
 })
-app.post("/authenticator", authenticator, (req, res) => {
-  res.json({
+app.post("/authenticator", authenticator, async function (req, res)  {
+  const userid =new mongoose.Types.ObjectId(req.decoded.userid);
+  try{
+    const avatar =await UserModel.findOne({_id:userid},{useravatar:1,_id:0});
+    res.json({
     isLoggedIn: true,
     username: req.decoded.username,
     userid: req.decoded.userid,
+    useravatar:avatar.useravatar
   });
+  }
+  catch(err)
+  {
+    console.log(err.message);
+    res.json({
+      message:"some error occured" 
+       });
+  }
 });
 app.post("/createsub", authenticator, async function (req, res) {
   const subname = req.body.subname;
@@ -118,7 +158,7 @@ app.post("/register", async function (req, res) {
     });
     await user.save();
     const userid = user._id.toString();
-    const token = jwt.sign({ username, userid }, process.env.SECRET_KEY);
+    const token = jwt.sign({ username, userid ,}, process.env.SECRET_KEY);
     if (token) {
       res.cookie("jwttoken", token, {
         maxAge: 86400000,
@@ -130,6 +170,7 @@ app.post("/register", async function (req, res) {
         isLoggedIn: true,
         username: username,
         userid: userid,
+        useravatar:null,
         userJoinedCommunities: user.communitiesjoined
       });
     } else {
@@ -143,7 +184,7 @@ app.post("/register", async function (req, res) {
       isLoggedIn: false,
     });
   }
-  console.log(username, userpassword);
+  // console.log(username, userpassword);
 });
 app.post('/logout', (req, res) => {
   res.clearCookie("jwttoken", {
@@ -167,7 +208,7 @@ app.post("/login", async function (req, res) {
   } else {
     const userid = isThere._id.toString();
     const token = jwt.sign(
-      { username: isThere.username, userid: userid },
+      { username: isThere.username, userid: isThere.userid,useravatar:isThere.useravatar },
       process.env.SECRET_KEY
     );
     if (token) {
@@ -181,6 +222,7 @@ app.post("/login", async function (req, res) {
         isLoggedIn: true,
         username: isThere.username,
         userid: userid,
+        useravatar:isThere.useravatar,
         userJoinedCommunities: isThere.communitiesjoined
       });
     } else {
@@ -300,7 +342,7 @@ app.get("/posts", authenticator, async function (req, res) {
       { communityId: communityId },
       { postbody: 0 }
     )
-      .populate("userid", "username")
+      .populate("userid", "username username")
       .sort({ ...sortObject, _id: 1 }).skip(skip).limit(pageSize);
     if (posts) {
       const modifiedposts = posts.map((ele) => {
@@ -538,7 +580,7 @@ app.post("/validpost", authenticator, async function (req, res) {
   const userid = req.decoded.userid;
   try {
     const post = await PostModel.findOne({ _id: postid })
-      .populate("userid", "username")
+      .populate("userid", "username useravatar")
       .populate("communityId", "subname");
 
     const modifiedPostObject = post.toObject();
@@ -616,7 +658,7 @@ app.post("/fetchcomments", authenticator, async function (req, res) {
       postId: postid,
       parentId: null,
     })
-      .populate("userid", "username")
+      .populate("userid", "username useravatar")
       .sort(sortObject)
       .limit(10);
     let modifiedcommentsArray = commentsArray.map((ele) => {
@@ -797,7 +839,7 @@ app.post("/fetchreply", authenticator, async function (req, res) {
     const commentsArray = await CommentModel.find({
       postId: postid,
       parentId: parentid,
-    }).populate("userid", "username");
+    }).populate("userid", "username useravatar");
     let modifiedcommentsArray = commentsArray.map((ele) => {
       let obj = ele.toObject();
       const hasLiked = obj.upvoterId.some((id) => id.equals(userid));
@@ -852,7 +894,7 @@ app.post("/joingroup", authenticator, async function (req, res) {
 app.post("/uservalid", authenticator, async function (req, res) {
   const username = req.body.username;
   try {
-    const usernameInDB = await UserModel.findOne({ username: username }, { username: 1, _id: 1 });
+    const usernameInDB = await UserModel.findOne({ username: username }, { username: 1, _id: 1,useravatar:1 });
     let userinfo = {};
     if (usernameInDB.username) {
       const likes = await PostModel.find({ upvoterId: { $in: [usernameInDB._id] } },
@@ -889,6 +931,7 @@ app.post("/uservalid", authenticator, async function (req, res) {
       }
       userinfo.userid = usernameInDB._id;
       userinfo.username = usernameInDB.username;
+      userinfo.useravatar=usernameInDB.useravatar;
       res.json({
         isValidUser: true,
         userinfo: userinfo
@@ -910,7 +953,7 @@ app.post("/uservalid", authenticator, async function (req, res) {
 })
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
-  console.log(token);
+  // console.log(token);
   jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
     if (err) {
       return next(new Error("Authentication error"));
@@ -921,7 +964,7 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
-  console.log(socket.id);
+  // console.log(socket.id);
   socket.on("addComment", async function (commentArgs) {
     const userid = new mongoose.Types.ObjectId(socket.user.userid);
     const postid = new mongoose.Types.ObjectId(commentArgs.postid);
@@ -938,14 +981,16 @@ io.on("connection", (socket) => {
       // console.log(depthObject);
       depth = depthObject.depth + 1;
     }
-    const commentAdded = await CommentModel.create({
+    const commentAdded = new  CommentModel.create({
       userid: userid,
       postId: postid,
       parentId: parentid,
       commentText: comment,
       depth: depth,
-    });
-    console.log(commentAdded);
+    })
+    await commentAdded.save();
+    await commentAdded.save().populate("userid","username useravatar");
+    // console.log(commentAdded);
     io.to(commentArgs.room).emit(
       `commentAdded${commentArgs.room}`,
       commentAdded
@@ -953,11 +998,11 @@ io.on("connection", (socket) => {
   });
   socket.on("joinRoomOfComment", (args) => {
     socket.join(args.room);
-     console.log(socket.id+"joined"+args.room);
+    // console.log(socket.id + "joined" + args.room);
   });
   socket.on("leaveRoomOfComment", (args) => {
     socket.leave(args.room);
-     console.log(socket.id+"left"+args.room);
+    // console.log(socket.id + "left" + args.room);
   });
 });
 const PORT = process.env.PORT || process.env.BACKEND_PORT;

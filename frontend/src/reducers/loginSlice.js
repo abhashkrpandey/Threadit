@@ -4,7 +4,8 @@ const initialStateLogin = {
         username: null,
         isLoggedIn: false,
         userid: null,
-        userJoinedCommunities: []
+        userJoinedCommunities: [],
+        useravatar: null
     }
 }
 const initialStateCurrentActivity = {
@@ -18,10 +19,22 @@ export const loginSlice = createSlice({
     initialState: initialStateLogin,
     reducers: {
         updateUserInfo: (state, action) => {
-            state.userinfo.username = action.payload.username,
-                state.userinfo.isLoggedIn = action.payload.isLoggedIn,
-                state.userinfo.userid = action.payload.userid
-            state.userinfo.userJoinedCommunities = action.payload.userJoinedCommunities || [];
+            const payload = action.payload;
+
+            if (payload.username !== undefined)
+                state.userinfo.username = payload.username;
+
+            if (payload.isLoggedIn !== undefined)
+                state.userinfo.isLoggedIn = payload.isLoggedIn;
+
+            if (payload.userid !== undefined)
+                state.userinfo.userid = payload.userid;
+
+            if (payload.userJoinedCommunities !== undefined)
+                state.userinfo.userJoinedCommunities = payload.userJoinedCommunities;
+
+            if (payload.useravatar !== undefined)
+                state.userinfo.useravatar = payload.useravatar;
         },
         addCommunityInArray: (state, action) => {
             state.userinfo.userJoinedCommunities.push(action.payload.value);
