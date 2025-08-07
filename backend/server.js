@@ -996,7 +996,7 @@ io.on("connection", (socket) => {
   });
 });
 
-app.get('/{*splat}',(req,res)=>
+app.get('/{*splat}',authenticator,(req,res)=>
 {
     res.sendFile(path.join(__dirname,".." ,"frontend", "index.html"));
 })
