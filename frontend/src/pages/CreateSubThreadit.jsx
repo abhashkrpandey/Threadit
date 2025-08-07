@@ -105,7 +105,7 @@ export default function CreateSubThreadit() {
           accessiblity: accessiblity,
           topics: topics,
           userid: userid,
-        }
+        },
         {withCredentials:true}
       );
       if (response.data.created) {
