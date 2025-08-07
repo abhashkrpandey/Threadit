@@ -165,7 +165,6 @@ app.post("/register", async function (req, res) {
         sameSite: "None",
         secure: true,
         path: '/',
-        domain: '.onrender.com'
       });
       res.json({
         isLoggedIn: true,
@@ -218,7 +217,6 @@ app.post("/login", async function (req, res) {
         sameSite: "None",
         secure: true,
         path: '/',
-        domain: '.onrender.com'
       });
       res.json({
         isLoggedIn: true,

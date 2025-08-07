@@ -22,6 +22,7 @@ import Swal from "sweetalert2";
 
 export default function App() {
   axios.defaults.withCredentials = true;
+  axios.defaults.baseURL="https://threadit-backend-mr95.onrender.com";
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.login.userinfo.isLoggedIn);
   useEffect(() => {
