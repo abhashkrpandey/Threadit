@@ -158,7 +158,7 @@ app.post("/register", async function (req, res) {
     });
     await user.save();
     const userid = user._id.toString();
-    const token = jwt.sign({ username, userid ,}, process.env.SECRET_KEY);
+    const token = jwt.sign({ username, userid}, process.env.SECRET_KEY);
     if (token) {
       res.json({
         isLoggedIn: true,
@@ -203,7 +203,7 @@ app.post("/login", async function (req, res) {
   } else {
     const userid = isThere._id.toString();
     const token = jwt.sign(
-      { username: isThere.username, userid: isThere.userid,useravatar:isThere.useravatar },
+      { username: isThere.username, userid: isThere._id},
       process.env.SECRET_KEY
     );
     if (token) {
