@@ -13,7 +13,9 @@ export default function Explore() {
   useEffect(() => {
     async function subredditFetcher() {
       const response = await axios.get(
-        import.meta.env.VITE_BACKEND_URL + "/subredditsgroups"
+        import.meta.env.VITE_BACKEND_URL + "/subredditsgroups",{
+          withCredentials:true
+        }
       );
       if (response.data.subredditsArray) {
         setsubredditgroupsArray(response.data.subredditsArray);

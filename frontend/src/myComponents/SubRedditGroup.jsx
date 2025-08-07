@@ -28,6 +28,8 @@ export default function SubRedditGroup({ prop }) {
         event.stopPropagation();
         const response =await axios.post(import.meta.env.VITE_BACKEND_URL+"/joingroup",{
           communityid:prop._id
+        },{
+          withCredentials:true
         })
         if(response.data.joined)
         {

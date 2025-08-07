@@ -54,6 +54,8 @@ export default function Register() {
         {
           username: ValidUserName,
           userpassword: UserPassword,
+        },{
+          withCredentials:true
         }
       );
       setLoading(false);
@@ -108,6 +110,8 @@ export default function Register() {
           import.meta.env.VITE_BACKEND_URL + "/validname",
           {
             username: finalTypedName,
+          },{
+            withCredentials:true
           }
         );
         if (response.data.isValid === true) {

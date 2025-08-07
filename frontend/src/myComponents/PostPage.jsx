@@ -14,6 +14,9 @@ export default function PostPage() {
         import.meta.env.VITE_BACKEND_URL + "/validpost",
         {
           postid: postid,
+        },
+        {
+          withCredentials:true
         }
       );
       if (response.data.isValidPost) {

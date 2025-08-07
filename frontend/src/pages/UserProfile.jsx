@@ -108,6 +108,8 @@ export default function UserProfile() {
         import.meta.env.VITE_BACKEND_URL + "/uservalid",
         {
           username: username,
+        },{
+          withCredentials:true
         }
       );
       if (response.data.isValidUser) {
@@ -152,6 +154,7 @@ export default function UserProfile() {
             headers: {
               "Content-Type": "multipart/form-data",
             },
+            withCredentials:true
           }
         );
         setisLoading(false);

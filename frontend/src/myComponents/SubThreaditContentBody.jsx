@@ -79,6 +79,7 @@ export default function SubThreaditContentBody() {
             sortType: sortType,
             pageNumber: currentPage,
           },
+          withCredentials:true
         }
       );
       if (response.data.isThereAnyPost) {
@@ -95,7 +96,8 @@ export default function SubThreaditContentBody() {
       import.meta.env.VITE_BACKEND_URL + "/joingroup",
       {
         communityid: SubThreaditDetails._id,
-      }
+      },
+      {withCredentials:true}
     );
     if (response.data.joined) {
       sethasJoined(true);

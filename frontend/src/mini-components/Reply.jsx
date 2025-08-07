@@ -22,7 +22,9 @@ export default function Reply({ haveToReply, parentid, postid }) {
         comment: replyText,
         parentid: parentid,
         postid: postid,
-      }
+      },{
+          withCredentials:true
+        }
     );
     if (response.data.isCommentAdded) {
       clearText();

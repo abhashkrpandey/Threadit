@@ -12,7 +12,10 @@ export default function MyJoinedCommunityList() {
   useEffect(() => {
     async function listCollector() {
       const response = await axios.post(
-        import.meta.env.VITE_BACKEND_URL + "/mycommunitylist"
+        import.meta.env.VITE_BACKEND_URL + "/mycommunitylist",
+        {
+          withCredentials:true
+        }
       );
       if (response.data.isPresent) {
         setCommunityList(response.data.communityList.communitiesjoined);

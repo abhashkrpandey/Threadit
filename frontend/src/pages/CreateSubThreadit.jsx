@@ -106,6 +106,7 @@ export default function CreateSubThreadit() {
           topics: topics,
           userid: userid,
         }
+        {withCredentials:true}
       );
       if (response.data.created) {
         Swal.fire({

@@ -45,7 +45,9 @@ export default function Navbar() {
     navigate(`/u/${username}`);
   }
   async function logoutFunc() {
-    const response =await axios.post(import.meta.env.VITE_BACKEND_URL+"/logout");
+    const response =await axios.post(import.meta.env.VITE_BACKEND_URL+"/logout",{
+      withCredentials:true
+    });
     if(response.data.message==='Logged out')
     {
        dispatch(

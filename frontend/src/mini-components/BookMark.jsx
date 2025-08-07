@@ -11,6 +11,9 @@ export default function BookMark({ bookmarkCount, hasbookmarked, postid }) {
       import.meta.env.VITE_BACKEND_URL + "/bookmarkpost",
       {
         postid: postid,
+      },
+      {
+        withCredentials: true,
       }
     );
     if (response.data.isbookmarked) {
@@ -28,7 +31,11 @@ export default function BookMark({ bookmarkCount, hasbookmarked, postid }) {
         onClick={bookmarkFunc}
         className={"hover:bg-gray-300"}
       >
-        {hasBookmarked ? <Bookmark className="fill-orange-500"/> : <Bookmark/>}
+        {hasBookmarked ? (
+          <Bookmark className="fill-orange-500" />
+        ) : (
+          <Bookmark />
+        )}
         {bookmarkLive}
       </Button>
     </>

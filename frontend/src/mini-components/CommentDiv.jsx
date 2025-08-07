@@ -57,7 +57,10 @@ export default function CommentDiv({ postid }) {
       {
         postid: postid,
         sortType:sortType
-      }
+      },
+      {
+          withCredentials:true
+        }
     );
     if (response.data.hasFetched) {
       setcommentArray(response.data.commentsArray);
@@ -73,7 +76,10 @@ export default function CommentDiv({ postid }) {
         comment: commentText,
         postid: postid,
         parentid: null,
-      }
+      },
+      {
+          withCredentials:true
+        }
     );
     if (response.data.isCommentAdded) {
       clearText();

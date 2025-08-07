@@ -16,6 +16,8 @@ export default function SubThreadit() {
             const response = await axios.post(import.meta.env.VITE_BACKEND_URL + "/validpathchecker",
                 {
                     subname: subname
+                },{
+                    withCredentials:true
                 }
             );
             if(response.data.isValid)

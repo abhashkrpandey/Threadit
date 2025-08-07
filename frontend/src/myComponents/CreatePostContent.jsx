@@ -89,7 +89,10 @@ export default function CreatePostContent() {
             postbody: postbody,
             userid: userid,
             communityId: validSubRedditId,
-          }
+          },
+          {
+          withCredentials:true
+        }
         );
         if (response.data.created) {
           Swal.fire({ title: "Post created", icon: "success" });
@@ -125,7 +128,10 @@ export default function CreatePostContent() {
     try {
       const response = await axios.post(
         import.meta.env.VITE_BACKEND_URL + "/searchcommunity",
-        { subRedditName: query }
+        { subRedditName: query },
+        {
+          withCredentials:true
+        }
       );
       if (response.data.found) {
         setArrayValidSubRedditName(response.data.subReddits);

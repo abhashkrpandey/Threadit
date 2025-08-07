@@ -15,7 +15,10 @@ export default function LikeDisLikeButton(props) {
       {
         postid: props.postid,
         commentid: props.commentid,
-      }
+      },
+      {
+          withCredentials:true
+        }
     );
     console.log(response.data.toogle);
     if (response.data.likeCounted && response.data.toggle == false) {
@@ -38,7 +41,9 @@ export default function LikeDisLikeButton(props) {
       {
         postid: props.postid,
         commentid: props.commentid,
-      }
+      },{
+          withCredentials:true
+        }
     );
     if (response.data.dislikeCounted && response.data.toggle == false) {
       setdownvoteLive(downvoteLive + 1);

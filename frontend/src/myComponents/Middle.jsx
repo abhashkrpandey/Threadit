@@ -58,6 +58,7 @@ export default function Middle() {
             sortType: sortType,
             pageNumber: currentPage,
           },
+          withCredentials:true
         }
       );
       setisLoading(false);
@@ -75,7 +76,8 @@ export default function Middle() {
             sortType: sortType,
             pageNumber: currentPage,
           },
-        }
+          withCredentials:true
+        },
       );
       setisLoading(false);
       if (response.data.isAbleToLoad === true) {

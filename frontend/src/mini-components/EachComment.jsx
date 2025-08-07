@@ -50,6 +50,9 @@ export default function EachComment({ props, postid }) {
         {
           postid: postid,
           parentid: props._id,
+        },
+        {
+          withCredentials:true
         }
       );
       if (response.data.hasFetched) {
