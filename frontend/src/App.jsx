@@ -31,7 +31,14 @@ export default function App() {
         import.meta.env.VITE_BACKEND_URL + "/authenticator"
       );
       if (response.data.isLoggedIn) {
-        dispatch(updateUserInfo(response.data));
+        dispatch(
+          updateUserInfo({
+            isLoggedIn: response.data.isLoggedIn,
+            username: response.data.username,
+            userid: response.data.userid,
+            useravatar: response.data.useravatar,
+          })
+        );
       }
     }
     if (navigator.onLine) {
@@ -49,15 +56,13 @@ export default function App() {
 
     if (token) {
       if (!socket.connected) {
-        socket.auth = { token: token }; 
+        socket.auth = { token: token };
         socket.connect();
       }
 
-      socket.on("connect", () => {
-      });
+      socket.on("connect", () => {});
 
-      socket.on("connect_error", (err) => {
-      });
+      socket.on("connect_error", (err) => {});
     } else {
       if (socket.connected) {
         socket.disconnect();
