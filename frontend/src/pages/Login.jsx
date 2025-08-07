@@ -48,12 +48,11 @@ export default function Login() {
         {
           username: UserNameLogin,
           userpassword: UserPasswordLogin,
-        },{
-          withCredentials:true
         }
       );
       setLoading(false);
       if (response.data.isLoggedIn) {
+        localStorage.setItem("jwttoken",response.data.jwttoken);
         dispatch(updateUserInfo(response.data));
         // Cookies.set("username", response.data.username);
         navigate("/");

@@ -14,7 +14,9 @@ export default function Explore() {
     async function subredditFetcher() {
       const response = await axios.get(
         import.meta.env.VITE_BACKEND_URL + "/subredditsgroups",{
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
       );
       if (response.data.subredditsArray) {

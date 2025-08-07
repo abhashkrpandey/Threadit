@@ -16,7 +16,9 @@ export default function PostPage() {
           postid: postid,
         },
         {
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
       );
       if (response.data.isValidPost) {

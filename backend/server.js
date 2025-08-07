@@ -160,18 +160,13 @@ app.post("/register", async function (req, res) {
     const userid = user._id.toString();
     const token = jwt.sign({ username, userid ,}, process.env.SECRET_KEY);
     if (token) {
-      res.cookie("jwttoken", token, {
-        maxAge: 86400000,
-        sameSite: "None",
-        secure: true,
-        domain:".onrender.com"
-      });
       res.json({
         isLoggedIn: true,
         username: username,
         userid: userid,
         useravatar:null,
-        userJoinedCommunities: user.communitiesjoined
+        userJoinedCommunities: user.communitiesjoined,
+        jwttoken:token
       });
     } else {
       console.log("Internal Error");
@@ -212,19 +207,13 @@ app.post("/login", async function (req, res) {
       process.env.SECRET_KEY
     );
     if (token) {
-      res.cookie("jwttoken", token, {
-        maxAge: 86400000,
-        sameSite: "None",
-        secure: true,
-        domain:".onrender.com"
-
-      });
       res.json({
         isLoggedIn: true,
         username: isThere.username,
         userid: userid,
         useravatar:isThere.useravatar,
-        userJoinedCommunities: isThere.communitiesjoined
+        userJoinedCommunities: isThere.communitiesjoined,
+        jwttoken:token
       });
     } else {
       res.status(500).json({

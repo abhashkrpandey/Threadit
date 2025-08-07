@@ -59,7 +59,9 @@ export default function CommentDiv({ postid }) {
         sortType:sortType
       },
       {
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
     );
     if (response.data.hasFetched) {
@@ -78,7 +80,9 @@ export default function CommentDiv({ postid }) {
         parentid: null,
       },
       {
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
     );
     if (response.data.isCommentAdded) {

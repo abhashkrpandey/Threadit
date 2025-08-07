@@ -22,7 +22,7 @@ import Swal from "sweetalert2";
 
 export default function App() {
   axios.defaults.withCredentials = true;
-  axios.defaults.baseURL="https://threadit-backend-mr95.onrender.com";
+  axios.defaults.baseURL = "https://threadit-backend-mr95.onrender.com";
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.login.userinfo.isLoggedIn);
   useEffect(() => {
@@ -30,7 +30,9 @@ export default function App() {
       const response = await axios.post(
         import.meta.env.VITE_BACKEND_URL + "/authenticator",
         {
-          withCredentials:true
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
       );
       if (response.data.isLoggedIn) {

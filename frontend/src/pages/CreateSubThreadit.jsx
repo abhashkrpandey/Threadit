@@ -106,7 +106,9 @@ export default function CreateSubThreadit() {
           topics: topics,
           userid: userid,
         },
-        {withCredentials:true}
+        { headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }}
       );
       if (response.data.created) {
         Swal.fire({

@@ -52,7 +52,9 @@ export default function EachComment({ props, postid }) {
           parentid: props._id,
         },
         {
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
       );
       if (response.data.hasFetched) {

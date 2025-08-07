@@ -17,7 +17,9 @@ export default function SubThreadit() {
                 {
                     subname: subname
                 },{
-                    withCredentials:true
+                     headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
                 }
             );
             if(response.data.isValid)

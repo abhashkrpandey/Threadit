@@ -91,7 +91,9 @@ export default function CreatePostContent() {
             communityId: validSubRedditId,
           },
           {
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
         );
         if (response.data.created) {
@@ -130,7 +132,9 @@ export default function CreatePostContent() {
         import.meta.env.VITE_BACKEND_URL + "/searchcommunity",
         { subRedditName: query },
         {
-          withCredentials:true
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
       );
       if (response.data.found) {

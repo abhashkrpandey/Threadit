@@ -29,7 +29,9 @@ export default function SubRedditGroup({ prop }) {
         const response =await axios.post(import.meta.env.VITE_BACKEND_URL+"/joingroup",{
           communityid:prop._id
         },{
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         })
         if(response.data.joined)
         {

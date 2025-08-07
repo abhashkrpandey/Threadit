@@ -79,7 +79,9 @@ export default function SubThreaditContentBody() {
             sortType: sortType,
             pageNumber: currentPage,
           },
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
       );
       if (response.data.isThereAnyPost) {
@@ -97,7 +99,9 @@ export default function SubThreaditContentBody() {
       {
         communityid: SubThreaditDetails._id,
       },
-      {withCredentials:true}
+      { headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }}
     );
     if (response.data.joined) {
       sethasJoined(true);

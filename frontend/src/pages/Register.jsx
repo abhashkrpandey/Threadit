@@ -54,12 +54,11 @@ export default function Register() {
         {
           username: ValidUserName,
           userpassword: UserPassword,
-        },{
-          withCredentials:true
         }
       );
       setLoading(false);
       if (response.data.isLoggedIn) {
+        localStorage.setItem("jwttoken",response.data.jwttoken);
         dispatch(updateUserInfo(response.data));
         navigate("/");
       } else {
@@ -110,8 +109,6 @@ export default function Register() {
           import.meta.env.VITE_BACKEND_URL + "/validname",
           {
             username: finalTypedName,
-          },{
-            withCredentials:true
           }
         );
         if (response.data.isValid === true) {

@@ -13,7 +13,9 @@ export default function BookMark({ bookmarkCount, hasbookmarked, postid }) {
         postid: postid,
       },
       {
-        withCredentials: true,
+         headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
       }
     );
     if (response.data.isbookmarked) {

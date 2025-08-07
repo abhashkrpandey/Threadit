@@ -44,7 +44,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { updateUserInfo } from "../reducers/loginSlice";
 
-
 export default function UserProfile() {
   const params = useParams();
   const username = params.username;
@@ -55,8 +54,8 @@ export default function UserProfile() {
   const [avatar, setavatar] = useState([]);
   const isLoggedIn = useSelector((state) => state.login.userinfo.isLoggedIn);
   const [isLoading, setisLoading] = useState(false);
-  const dispatch =useDispatch();
-  const useravatar=useSelector((state) => state.login.userinfo.useravatar);
+  const dispatch = useDispatch();
+  const useravatar = useSelector((state) => state.login.userinfo.useravatar);
 
   const [errorMessage, seterrorMessage] = useState("");
 
@@ -108,8 +107,11 @@ export default function UserProfile() {
         import.meta.env.VITE_BACKEND_URL + "/uservalid",
         {
           username: username,
-        },{
-          withCredentials:true
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          },
         }
       );
       if (response.data.isValidUser) {
@@ -138,7 +140,7 @@ export default function UserProfile() {
       document.getElementById("avatar").value = "";
     }
 
-    const maxSize = 1 * 1024* 1024;
+    const maxSize = 1 * 1024 * 1024;
     if (avatar.size > maxSize) {
       seterrorMessage("Avatar size exceeds 1MB!");
       document.getElementById("avatar").value = "";
@@ -154,16 +156,16 @@ export default function UserProfile() {
             headers: {
               "Content-Type": "multipart/form-data",
             },
-            withCredentials:true
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+            },
           }
         );
         setisLoading(false);
         document.getElementById("avatar").value = "";
         setavatar([]);
         if (response.data.isSaved) {
-          dispatch( updateUserInfo(
-          { useravatar: response.data.useravatar }
-          ))
+          dispatch(updateUserInfo({ useravatar: response.data.useravatar }));
           Swal.fire({
             title: "avatar changed",
             timer: 2000,
@@ -230,19 +232,31 @@ export default function UserProfile() {
                           {errorMessage.length < 1 ? (
                             <></>
                           ) : (
-                            <div className="text-red-600 text-sm">{errorMessage}</div>
+                            <div className="text-red-600 text-sm">
+                              {errorMessage}
+                            </div>
                           )}
                           <Input
                             id="avatar"
                             type="file"
                             onChange={inputer}
-                            onClick={()=>{seterrorMessage("")}}
+                            onClick={() => {
+                              seterrorMessage("");
+                            }}
                           ></Input>
                         </div>
                       </div>
                       <DialogFooter>
                         <DialogClose asChild>
-                          <Button variant="outline" onClick={()=>{seterrorMessage("");setavatar([])}}>Cancel</Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              seterrorMessage("");
+                              setavatar([]);
+                            }}
+                          >
+                            Cancel
+                          </Button>
                         </DialogClose>
                         <div>
                           <Button onClick={avatarChanger}>

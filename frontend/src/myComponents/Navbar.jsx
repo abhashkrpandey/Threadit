@@ -45,20 +45,23 @@ export default function Navbar() {
     navigate(`/u/${username}`);
   }
   async function logoutFunc() {
-    const response =await axios.post(import.meta.env.VITE_BACKEND_URL+"/logout",{
-      withCredentials:true
-    });
-    if(response.data.message==='Logged out')
-    {
-       dispatch(
-      updateUserInfo({
-        username: null,
-        isLoggedIn: false,
-        userid: null,
-        useravatar:null,
-        userJoinedCommunities: [],
-      })
-    );
+    // const response =await axios.post(import.meta.env.VITE_BACKEND_URL+"/logout",{
+    //   headers: {
+    //         Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+    //       }
+    // });
+    // if(response.data.message==='Logged out')
+    // {
+    //    dispatch(
+    //   updateUserInfo({
+    //     username: null,
+    //     isLoggedIn: false,
+    //     userid: null,
+    //     useravatar:null,
+    //     userJoinedCommunities: [],
+    //   })
+    // );
+    localStorage.removeItem("jwttoken");
     window.location.reload();
     }
   }
@@ -134,7 +137,9 @@ export default function Navbar() {
                     </TooltipContent>
                   </Tooltip>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={logoutFunc}>LogOut</DropdownMenuItem>
+                <DropdownMenuItem onClick={()=>{localStorage.removeItem("jwttoken");
+    window.location.reload();
+    }}>LogOut</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (

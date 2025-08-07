@@ -17,7 +17,9 @@ export default function LikeDisLikeButton(props) {
         commentid: props.commentid,
       },
       {
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
     );
     console.log(response.data.toogle);
@@ -42,7 +44,9 @@ export default function LikeDisLikeButton(props) {
         postid: props.postid,
         commentid: props.commentid,
       },{
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
     );
     if (response.data.dislikeCounted && response.data.toggle == false) {

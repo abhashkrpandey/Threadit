@@ -14,7 +14,9 @@ export default function MyJoinedCommunityList() {
       const response = await axios.post(
         import.meta.env.VITE_BACKEND_URL + "/mycommunitylist",
         {
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
       );
       if (response.data.isPresent) {

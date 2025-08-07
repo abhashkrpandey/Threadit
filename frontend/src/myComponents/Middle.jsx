@@ -58,7 +58,9 @@ export default function Middle() {
             sortType: sortType,
             pageNumber: currentPage,
           },
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
       );
       setisLoading(false);
@@ -76,7 +78,9 @@ export default function Middle() {
             sortType: sortType,
             pageNumber: currentPage,
           },
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         },
       );
       setisLoading(false);

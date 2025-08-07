@@ -23,7 +23,9 @@ export default function Reply({ haveToReply, parentid, postid }) {
         parentid: parentid,
         postid: postid,
       },{
-          withCredentials:true
+           headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+          }
         }
     );
     if (response.data.isCommentAdded) {
