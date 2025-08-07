@@ -44,27 +44,26 @@ export default function Navbar() {
   function userProfileOpen() {
     navigate(`/u/${username}`);
   }
-  async function logoutFunc() {
-    // const response =await axios.post(import.meta.env.VITE_BACKEND_URL+"/logout",{
-    //   headers: {
-    //         Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
-    //       }
-    // });
-    // if(response.data.message==='Logged out')
-    // {
-    //    dispatch(
-    //   updateUserInfo({
-    //     username: null,
-    //     isLoggedIn: false,
-    //     userid: null,
-    //     useravatar:null,
-    //     userJoinedCommunities: [],
-    //   })
-    // );
-    localStorage.removeItem("jwttoken");
-    window.location.reload();
-    }
-  }
+  // async function logoutFunc() {
+  //   const response =await axios.post(import.meta.env.VITE_BACKEND_URL+"/logout",{
+  //     headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+  //         }
+  //   });
+  //   if(response.data.message==='Logged out')
+  //   {
+  //      dispatch(
+  //     updateUserInfo({
+  //       username: null,
+  //       isLoggedIn: false,
+  //       userid: null,
+  //       useravatar:null,
+  //       userJoinedCommunities: [],
+  //     })
+  //   );
+  //   window.location.reload();
+  //   }
+  // }
   return (
     <>
       <div className="flex flex-row justify-between gap-2  border-gray-300 border-b-2 ">
@@ -137,9 +136,12 @@ export default function Navbar() {
                     </TooltipContent>
                   </Tooltip>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={()=>{localStorage.removeItem("jwttoken");
-    window.location.reload();
-    }}>LogOut</DropdownMenuItem>
+                <DropdownMenuItem onClick={()=>
+                  {
+                    localStorage.removeItem("jwttoken")
+                    window.location.reload();
+                  }
+                }>LogOut</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
