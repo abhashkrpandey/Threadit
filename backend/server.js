@@ -996,10 +996,6 @@ io.on("connection", (socket) => {
   });
 });
 
-app.get('/{*splat}',authenticator,(req,res)=>
-{
-    res.sendFile(path.join(__dirname,".." ,"frontend", "index.html"));
-})
 const PORT = process.env.PORT || process.env.BACKEND_PORT;
 httpServer.listen(PORT, () => {
   console.log(`server running at ${PORT}`);
