@@ -28,7 +28,7 @@ export default function App() {
   useEffect(() => {
     async function authenticator() {
       const response = await axios.post(
-        import.meta.env.VITE_BACKEND_URL + "/authenticator",
+        import.meta.env.VITE_BACKEND_URL + "/authenticator",{},
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,

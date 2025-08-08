@@ -12,7 +12,7 @@ export default function MyJoinedCommunityList() {
   useEffect(() => {
     async function listCollector() {
       const response = await axios.post(
-        import.meta.env.VITE_BACKEND_URL + "/mycommunitylist",
+        import.meta.env.VITE_BACKEND_URL + "/mycommunitylist",{},
         {
            headers: {
             Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,

@@ -155,8 +155,6 @@ export default function UserProfile() {
           {
             headers: {
               "Content-Type": "multipart/form-data",
-            },
-            headers: {
               Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
             },
           }
