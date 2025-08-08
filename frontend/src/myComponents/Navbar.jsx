@@ -110,7 +110,7 @@ export default function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar>
-                  <AvatarImage src={useravatar===null?"https://github.com/shadcn.png":useravatar} />
+                  <AvatarImage alt={"profile image"} src={useravatar===null?"https://github.com/shadcn.png":useravatar} />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>

@@ -205,7 +205,7 @@ export default function UserProfile() {
                   <form>
                     <DialogTrigger asChild>
                       <Avatar className={"w-[50px] h-[50px]"}>
-                        <AvatarImage
+                        <AvatarImage alt="profile image"
                           src={
                             userinfo.useravatar === null
                               ? "https://github.com/shadcn.png"

@@ -34,7 +34,7 @@ export default function Middle() {
       let array=[];
       for (let i = 0; i < 5; i++) {
         array.push(
-          <Skeleton
+          <Skeleton key={i}
             className={"w-[913.91px] h-[147.6px] rounded-md mb-4 bg-gray-300"}
           ></Skeleton>
         );
