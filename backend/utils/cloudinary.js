@@ -22,7 +22,7 @@ async function  uploadOnCloudinary(localpath,foldername)
            },
        )
        fs.unlinkSync(localpath);
-       console.log("cloud-response"+response.url);
+    //    console.log("cloud-response"+response.url);
        return response.url;
     }catch(err)
     {
@@ -32,4 +32,15 @@ async function  uploadOnCloudinary(localpath,foldername)
     }
 }
 
-module.exports =uploadOnCloudinary;
+async function deletefromCloudinary(imagename)
+{
+    const response = await cloudinary.uploader.destroy(imagename);
+    console.log(response);
+    if(response.result==="ok")
+    {
+        return true;
+    }
+    return false;
+}
+
+module.exports ={uploadOnCloudinary,deletefromCloudinary};

@@ -28,6 +28,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CakeSlice, User } from "lucide-react";
 import { Globe } from "lucide-react";
 import { Users } from "lucide-react";
@@ -59,9 +60,23 @@ export default function SubThreaditContentBody() {
   const month = monthNames[date.getMonth()];
   const day = date.getDate();
   const year = date.getFullYear();
-
-  // console.log(`${month} ${day},${year}`);
+  const [isLoading, setisLoading] = useState(true);
+  const [skeletonArray, setskeletonArray] = useState([]);
   const [postArray, setPostArray] = useState([]);
+  useEffect(() => {
+    if (isLoading) {
+      let array = [];
+      for (let i = 0; i < 5; i++) {
+        array.push(
+          <Skeleton
+            key={i}
+            className={"w-[913.91px] h-[147.6px] rounded-md mb-4 bg-gray-300"}
+          ></Skeleton>
+        );
+      }
+      setskeletonArray(array);
+    }
+  }, [isLoading]);
   function sortTypeFunc(event) {
     // console.log(event);
     setsortType(event);
@@ -71,6 +86,7 @@ export default function SubThreaditContentBody() {
   }
   useEffect(() => {
     async function postCollector() {
+      setisLoading(true);
       const response = await axios.get(
         import.meta.env.VITE_BACKEND_URL + "/posts",
         {
@@ -79,11 +95,12 @@ export default function SubThreaditContentBody() {
             sortType: sortType,
             pageNumber: currentPage,
           },
-           headers: {
+          headers: {
             Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
-          }
+          },
         }
       );
+      setisLoading(false);
       if (response.data.isThereAnyPost) {
         setPostArray(response.data.posts);
         settotalPages(parseInt(response.data.totalPages));
@@ -99,9 +116,11 @@ export default function SubThreaditContentBody() {
       {
         communityid: SubThreaditDetails._id,
       },
-      { headers: {
-            Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
-          }}
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
+        },
+      }
     );
     if (response.data.joined) {
       sethasJoined(true);
@@ -146,95 +165,109 @@ export default function SubThreaditContentBody() {
           {hasJoined ? <>Joined</> : <>Join</>}
         </Button>
       </div>
-      <div className="grid grid-cols-5">
-        {postArray.length == 0 ? (
-          <div>No Posts Yet</div>
-        ) : (
-          <div className=" col-span-4 flex flex-col">
-            <>
-              <Select defaultValue="recent" onValueChange={sortTypeFunc}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Sort By" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Recent</SelectItem>
-                  <SelectItem value="likes">Most Liked</SelectItem>
-                  <SelectItem value="dislike">Most Disliked</SelectItem>
-                </SelectContent>
-              </Select>
-            </>
-            <div className="flex flex-col w-[100%]">
-              {postArray.map((ele) => (
-                <PostComponent
-                  key={ele._id.toString()}
-                  props={ele}
-                  isInsideSubreddit={true}
-                ></PostComponent>
-              ))}
-            </div>
-            <div className="mt-auto">
-              {postArray.length > 0 ? (
-                <>
-                  <Pagination>
-                    <PaginationContent>
-                      {currentPage != 1 ? (
-                        <>
-                          {" "}
-                          <PaginationPrevious
-                            onClick={(event) => {
-                              setCurrentPage(currentPage - 1);
-                            }}
-                            className={"cursor-default hover:bg-gray-500"}
-                          />
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      {currentPage > 1 ? (
-                        <>
-                          <PaginationEllipsis />
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      {
-                        <PaginationItem>
-                          <PaginationLink
-                            id={currentPage + 1}
-                            className={`cursor-default bg-gray-500 `}
-                          >
-                            {currentPage}
-                          </PaginationLink>
-                        </PaginationItem>
-                      }
-                      {totalPages - currentPage >= 1 ? (
-                        <>
-                          <PaginationEllipsis />
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                      {currentPage != totalPages ? (
-                        <>
-                          {" "}
-                          <PaginationNext
-                            onClick={(event) => {
-                              setCurrentPage(currentPage + 1);
-                            }}
-                            className={"cursor-default hover:bg-gray-500"}
-                          />
-                        </>
-                      ) : (
-                        <></>
-                      )}
-                    </PaginationContent>
-                  </Pagination>
-                </>
-              ) : (
-                <></>
-              )}
+      <div className="flex flex-row justify-between">
+        {isLoading ? (
+          <div className="flex flex-col">
+            <Skeleton className="w-[140px] h-10 rounded-md mb-4 bg-gray-300"></Skeleton>
+
+            <div className="w-[100%]">
+              {skeletonArray.map((ele) => {
+                return ele;
+              })}
             </div>
           </div>
+        ) : (
+          <>
+            {postArray.length == 0 ? (
+              <div>No Posts Yet</div>
+            ) : (
+              <div className="flex flex-col">
+                <>
+                  <Select defaultValue="recent" onValueChange={sortTypeFunc}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Sort By" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Recent</SelectItem>
+                      <SelectItem value="likes">Most Liked</SelectItem>
+                      <SelectItem value="dislike">Most Disliked</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </>
+                <div className="flex flex-col w-[913.91px]">
+                  {postArray.map((ele) => (
+                    <PostComponent
+                      key={ele._id.toString()}
+                      props={ele}
+                      isInsideSubreddit={true}
+                    ></PostComponent>
+                  ))}
+                </div>
+                <div className="mt-auto">
+                  {postArray.length > 0 ? (
+                    <>
+                      <Pagination>
+                        <PaginationContent>
+                          {currentPage != 1 ? (
+                            <>
+                              {" "}
+                              <PaginationPrevious
+                                onClick={(event) => {
+                                  setCurrentPage(currentPage - 1);
+                                }}
+                                className={"cursor-default hover:bg-gray-500"}
+                              />
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                          {currentPage > 1 ? (
+                            <>
+                              <PaginationEllipsis />
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                          {
+                            <PaginationItem>
+                              <PaginationLink
+                                id={currentPage + 1}
+                                className={`cursor-default bg-gray-500 `}
+                              >
+                                {currentPage}
+                              </PaginationLink>
+                            </PaginationItem>
+                          }
+                          {totalPages - currentPage >= 1 ? (
+                            <>
+                              <PaginationEllipsis />
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                          {currentPage != totalPages ? (
+                            <>
+                              {" "}
+                              <PaginationNext
+                                onClick={(event) => {
+                                  setCurrentPage(currentPage + 1);
+                                }}
+                                className={"cursor-default hover:bg-gray-500"}
+                              />
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                        </PaginationContent>
+                      </Pagination>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
         <div>
           <ScrollArea className="fixed  top-20   rounded-md border p-4 text-gray-600">

@@ -16,7 +16,7 @@ const CommentModel = require("./database/CommentModel");
 const cron = require('node-cron');
 const multer = require("multer");
 const storage = require("./middlewares/multer");
-const uploadOnCloudinary = require("./utils/cloudinary");
+const {uploadOnCloudinary,deletefromCloudinary} = require("./utils/cloudinary");
 const path =require("path");
 const upload = multer({ storage: storage });
 const app = express();
@@ -48,6 +48,30 @@ mongoose.connect(process.env.MONGOURL);
 app.post("/uploadavatar", upload.single("avatar"), authenticator, async function (req, res) {
   const localpath = req.file.path;
   const userid = req.decoded.userid;
+  try{
+  const user= await UserModel.findOne({_id:userid},{useravatar:1});
+    console.log(user);
+      if(user.useravatar)
+      {
+        const url =user.useravatar.split("/");
+        const arrayOfUrl=url[url.length-1];
+        const imageArray=arrayOfUrl.split(".");
+        const image=imageArray[0];
+        console.log(image);
+        const response = await deletefromCloudinary("avatar/"+image);
+        if(response)
+        {
+          console.log("removed from cloud");
+        }
+        else
+        {
+          console.log("not removed from cloud");
+        }
+      }
+    }catch(err)
+    {
+      console.log(err.message);
+    }
   const url = await uploadOnCloudinary(localpath,"avatar");
   if (url !== null) {
     try {

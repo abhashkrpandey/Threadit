@@ -4,7 +4,7 @@ const UserSchema =new mongoose.Schema({
     username:{type:String,required:true,unique:true},
     userpassword:{type:String,requires:true},
     communitiesjoined:[{type:ObjectId,ref: "subreddits"}],
-    useravatar:{type:String}
+    useravatar:{type:String,default:null}
 },{timestamps:true});
 
 const UserModel=mongoose.model("users",UserSchema);
