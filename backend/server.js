@@ -16,8 +16,8 @@ const CommentModel = require("./database/CommentModel");
 const cron = require('node-cron');
 const multer = require("multer");
 const storage = require("./middlewares/multer");
-const {uploadOnCloudinary,deletefromCloudinary} = require("./utils/cloudinary");
-const path =require("path");
+const { uploadOnCloudinary, deletefromCloudinary } = require("./utils/cloudinary");
+const path = require("path");
 const upload = multer({ storage: storage });
 const app = express();
 dotenv.config();
@@ -48,37 +48,33 @@ mongoose.connect(process.env.MONGOURL);
 app.post("/uploadavatar", upload.single("avatar"), authenticator, async function (req, res) {
   const localpath = req.file.path;
   const userid = req.decoded.userid;
-  try{
-  const user= await UserModel.findOne({_id:userid},{useravatar:1});
+  try {
+    const user = await UserModel.findOne({ _id: userid }, { useravatar: 1 });
     console.log(user);
-      if(user.useravatar)
-      {
-        const url =user.useravatar.split("/");
-        const arrayOfUrl=url[url.length-1];
-        const imageArray=arrayOfUrl.split(".");
-        const image=imageArray[0];
-        console.log(image);
-        const response = await deletefromCloudinary("avatar/"+image);
-        if(response)
-        {
-          console.log("removed from cloud");
-        }
-        else
-        {
-          console.log("not removed from cloud");
-        }
+    if (user.useravatar) {
+      const url = user.useravatar.split("/");
+      const arrayOfUrl = url[url.length - 1];
+      const imageArray = arrayOfUrl.split(".");
+      const image = imageArray[0];
+      console.log(image);
+      const response = await deletefromCloudinary("avatar/" + image);
+      if (response) {
+        console.log("removed from cloud");
       }
-    }catch(err)
-    {
-      console.log(err.message);
+      else {
+        console.log("not removed from cloud");
+      }
     }
-  const url = await uploadOnCloudinary(localpath,"avatar");
+  } catch (err) {
+    console.log(err.message);
+  }
+  const url = await uploadOnCloudinary(localpath, "avatar");
   if (url !== null) {
     try {
       const updateAvatar = await UserModel.updateOne({ _id: userid }, { $set: { useravatar: url } });
-      if (updateAvatar.modifiedCount==1) {
+      if (updateAvatar.modifiedCount == 1) {
         res.json({
-          useravatar:url,
+          useravatar: url,
           isSaved: true
         })
       }
@@ -125,23 +121,22 @@ app.post("/validname", async function (req, res) {
     )
   }
 })
-app.post("/authenticator", authenticator, async function (req, res)  {
-  const userid =new mongoose.Types.ObjectId(req.decoded.userid);
-  try{
-    const avatar =await UserModel.findOne({_id:userid},{useravatar:1,_id:0});
+app.post("/authenticator", authenticator, async function (req, res) {
+  const userid = new mongoose.Types.ObjectId(req.decoded.userid);
+  try {
+    const avatar = await UserModel.findOne({ _id: userid }, { useravatar: 1, _id: 0 });
     res.json({
-    isLoggedIn: true,
-    username: req.decoded.username,
-    userid: req.decoded.userid,
-    useravatar:avatar.useravatar
-  });
+      isLoggedIn: true,
+      username: req.decoded.username,
+      userid: req.decoded.userid,
+      useravatar: avatar.useravatar
+    });
   }
-  catch(err)
-  {
+  catch (err) {
     console.log(err.message);
     res.json({
-      message:"some error occured" 
-       });
+      message: "some error occured"
+    });
   }
 });
 app.post("/createsub", authenticator, async function (req, res) {
@@ -182,15 +177,15 @@ app.post("/register", async function (req, res) {
     });
     await user.save();
     const userid = user._id.toString();
-    const token = jwt.sign({ username, userid}, process.env.SECRET_KEY);
+    const token = jwt.sign({ username, userid }, process.env.SECRET_KEY);
     if (token) {
       res.json({
         isLoggedIn: true,
         username: username,
         userid: userid,
-        useravatar:null,
+        useravatar: null,
         userJoinedCommunities: user.communitiesjoined,
-        jwttoken:token
+        jwttoken: token
       });
     } else {
       console.log("Internal Error");
@@ -227,7 +222,7 @@ app.post("/login", async function (req, res) {
   } else {
     const userid = isThere._id.toString();
     const token = jwt.sign(
-      { username: isThere.username, userid: isThere._id},
+      { username: isThere.username, userid: isThere._id },
       process.env.SECRET_KEY
     );
     if (token) {
@@ -235,9 +230,9 @@ app.post("/login", async function (req, res) {
         isLoggedIn: true,
         username: isThere.username,
         userid: userid,
-        useravatar:isThere.useravatar,
+        useravatar: isThere.useravatar,
         userJoinedCommunities: isThere.communitiesjoined,
-        jwttoken:token
+        jwttoken: token
       });
     } else {
       res.status(500).json({
@@ -246,20 +241,29 @@ app.post("/login", async function (req, res) {
     }
   }
 });
-app.post("/createpost", authenticator, async function (req, res) {
+app.post("/createpost", upload.array("postImages", 5), authenticator, async function (req, res) {
   const userid = new mongoose.Types.ObjectId(req.body.userid);
   const posttitle = req.body.posttitle;
   const postbody = req.body.postbody;
   const communityId = req.body.communityId;
+  console.log(req.files);
+  const localPaths = req.files.map((ele) => ele.path);
   try {
     const userJoined = await UserModel.findOne({ _id: userid }, { communitiesjoined: 1 });
     const hasJoined = userJoined.communitiesjoined.some((id) => id.equals(communityId));
     if (hasJoined === true) {
+      let urls = [];
+      if (localPaths.length > 0) {
+        urls = await Promise.all(
+          localPaths.map(path => uploadOnCloudinary(path, "posts"))
+        );
+      }
       const post = new PostModel({
         userid: userid,
         posttitle: posttitle,
         postbody: postbody,
         communityId: communityId,
+        postImages: urls
       });
       await post.save();
       res.json({
@@ -272,6 +276,7 @@ app.post("/createpost", authenticator, async function (req, res) {
       })
     }
   } catch (err) {
+    console.log(err.message);
     res.json({
       created: false,
     });
@@ -908,7 +913,7 @@ app.post("/joingroup", authenticator, async function (req, res) {
 app.post("/uservalid", authenticator, async function (req, res) {
   const username = req.body.username;
   try {
-    const usernameInDB = await UserModel.findOne({ username: username }, { username: 1, _id: 1,useravatar:1 });
+    const usernameInDB = await UserModel.findOne({ username: username }, { username: 1, _id: 1, useravatar: 1 });
     let userinfo = {};
     if (usernameInDB.username) {
       const likes = await PostModel.find({ upvoterId: { $in: [usernameInDB._id] } },
@@ -945,7 +950,7 @@ app.post("/uservalid", authenticator, async function (req, res) {
       }
       userinfo.userid = usernameInDB._id;
       userinfo.username = usernameInDB.username;
-      userinfo.useravatar=usernameInDB.useravatar;
+      userinfo.useravatar = usernameInDB.useravatar;
       res.json({
         isValidUser: true,
         userinfo: userinfo
@@ -995,7 +1000,7 @@ io.on("connection", (socket) => {
       // console.log(depthObject);
       depth = depthObject.depth + 1;
     }
-    const commentAdded = new  CommentModel.create({
+    const commentAdded = new CommentModel.create({
       userid: userid,
       postId: postid,
       parentId: parentid,
@@ -1003,7 +1008,7 @@ io.on("connection", (socket) => {
       depth: depth,
     })
     await commentAdded.save();
-    await commentAdded.save().populate("userid","username useravatar");
+    await commentAdded.save().populate("userid", "username useravatar");
     // console.log(commentAdded);
     io.to(commentArgs.room).emit(
       `commentAdded${commentArgs.room}`,

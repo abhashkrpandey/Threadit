@@ -13,6 +13,7 @@ const PostSchema=new mongoose.Schema(
         downvote:{type:Number,default:0},
         bookmarked:{type:Number,default:0},
         reported:{type:Number,default:0},
+        postImages:{type:[String]},
         communityId:{type:ObjectId,ref:"subreddits",required:true}
     },
     {

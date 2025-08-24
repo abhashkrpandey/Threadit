@@ -128,14 +128,14 @@ export default function Navbar() {
                     </TooltipContent>
                   </Tooltip>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                {/* <DropdownMenuItem>
                   <Tooltip>
                     <TooltipTrigger> Edit Avatar</TooltipTrigger>
                     <TooltipContent>
                       <p>Not functional yet</p>
                     </TooltipContent>
                   </Tooltip>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={()=>
                   {
                     localStorage.removeItem("jwttoken")

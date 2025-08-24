@@ -58,6 +58,7 @@ export default function UserProfile() {
   const useravatar = useSelector((state) => state.login.userinfo.useravatar);
 
   const [errorMessage, seterrorMessage] = useState("");
+  
 
   function postPageOpenFunc(id) {
     if (isLoggedIn === false) {
@@ -197,7 +198,6 @@ export default function UserProfile() {
 
         <div className="flex flex-row  gap-6">
           <Left />
-
           <div className="flex flex-col gap-6 w-full max-w-2xl shadow-none">
             {userinfo.username && (
               <div className="flex items-center gap-4  rounded-xl  shadow-none p-4">
