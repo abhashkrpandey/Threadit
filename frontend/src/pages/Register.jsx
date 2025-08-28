@@ -133,8 +133,8 @@ export default function Register() {
   }, [finalTypedName]);
   return (
     <>
-      <div className="h-dvh flex justify-center items-center bg-gray-100">
-        <div className="bg-white shadow-lg rounded-xl p-6 w-[350px]">
+      <div className="h-dvh flex justify-center items-center bg-gray-100 dark:bg-[#020618]">
+        <div className="bg-white  dark:bg-[#06103a] shadow-lg rounded-xl p-6 w-[350px]">
           <form className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <div className="flex flex-row items-center gap-2">

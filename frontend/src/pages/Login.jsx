@@ -72,8 +72,8 @@ export default function Login() {
   }
   return (
     <>
-      <div className="h-dvh flex justify-center items-center bg-gray-100">
-        <div className="bg-white shadow-md rounded-xl p-6 w-[320px]">
+      <div className="h-dvh flex justify-center items-center bg-gray-100 dark:bg-[#020618]">
+        <div className="bg-white  dark:bg-[#06103a] shadow-md rounded-xl p-6 w-[320px]">
           <form className="flex flex-col gap-4">
             <Input
               type="text"
