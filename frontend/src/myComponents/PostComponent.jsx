@@ -36,7 +36,7 @@ export default function PostComponent({ props, isInsideSubreddit }) {
       {props._id.toString() !== undefined ? (
         <Card
           onClick={postPageOpenFunc}
-          className={"gap-4 hover:bg-gray-200 py-3"}
+          className={"gap-4 hover:bg-gray-300 dark:text-gray-600 py-3"}
         >
           <CardHeader>
             {isInsideSubreddit === false ? (

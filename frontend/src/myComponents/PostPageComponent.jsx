@@ -63,7 +63,7 @@ export default function PostPageComponent(props) {
             <CardTitle className={"text-2xl"}>{props.post.posttitle}</CardTitle>
             {props.post.postImages.length > 0 ? (
               <div className="">
-                <Carousel className="w-[300px] h-[200px] mx-auto shadow-2xl rounded-xl bg-gray-100">
+                <Carousel className="w-[150px] h-[100px] md:w-[300px] md:h-[200px] ml-4 shadow-2xl rounded-xl bg-gray-100">
                   <CarouselContent className="h-full">
                     {props.post.postImages.map((ele, idx) => (
                       <CarouselItem

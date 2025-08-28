@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { updateUserInfo } from "../reducers/loginSlice";
+import NotLoggedIn from "./NotLoggedIn";
 
 export default function UserProfile() {
   const params = useParams();
@@ -58,7 +59,6 @@ export default function UserProfile() {
   const useravatar = useSelector((state) => state.login.userinfo.useravatar);
 
   const [errorMessage, seterrorMessage] = useState("");
-  
 
   function postPageOpenFunc(id) {
     if (isLoggedIn === false) {
@@ -93,8 +93,8 @@ export default function UserProfile() {
                 <DateTime date={ele.createdAt} />
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="font-bold">{ele.posttitle}</p>
+            <CardContent >
+              <p className="font-bold dark:text-gray-500">{ele.posttitle}</p>
             </CardContent>
           </Card>
         );
@@ -198,174 +198,186 @@ export default function UserProfile() {
 
         <div className="flex flex-row  gap-6">
           <Left />
-          <div className="flex flex-col gap-6 w-full max-w-2xl shadow-none">
-            {userinfo.username && (
-              <div className="flex items-center gap-4  rounded-xl  shadow-none p-4">
-                <Dialog>
-                  <form>
-                    <DialogTrigger asChild>
-                      <Avatar className={"w-[50px] h-[50px]"}>
-                        <AvatarImage alt="profile image"
-                          src={
-                            userinfo.useravatar === null
-                              ? "https://github.com/shadcn.png"
-                              : useravatar
-                          }
-                        />
-                        <AvatarFallback>
-                          {userinfo.username.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Change Avatar</DialogTitle>
-                        <DialogDescription>
-                          Make sure image is less or equal to 1MB
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4">
-                        <div className="grid gap-3">
-                          <Label htmlFor="name-1">Image</Label>
-                          {errorMessage.length < 1 ? (
-                            <></>
-                          ) : (
-                            <div className="text-red-600 text-sm">
-                              {errorMessage}
+          {isLoggedIn === true ? (
+            <>
+              <div className="flex flex-col  shadow-none w-full">
+                {userinfo.username && (
+                  <div className="flex items-center gap-4  rounded-xl  shadow-none p-4">
+                    <Dialog>
+                      <form>
+                        <DialogTrigger asChild>
+                          <Avatar className={"w-[50px] h-[50px]"}>
+                            <AvatarImage
+                              alt="profile image"
+                              src={
+                                userinfo.useravatar === null
+                                  ? "https://github.com/shadcn.png"
+                                  : useravatar
+                              }
+                            />
+                            <AvatarFallback>
+                              {userinfo.username.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <DialogHeader>
+                            <DialogTitle>Change Avatar</DialogTitle>
+                            <DialogDescription>
+                              Make sure image is less or equal to 1MB
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4">
+                            <div className="grid gap-3">
+                              <Label htmlFor="name-1">Image</Label>
+                              {errorMessage.length < 1 ? (
+                                <></>
+                              ) : (
+                                <div className="text-red-600 text-sm">
+                                  {errorMessage}
+                                </div>
+                              )}
+                              <Input
+                                id="avatar"
+                                type="file"
+                                onChange={inputer}
+                                onClick={() => {
+                                  seterrorMessage("");
+                                }}
+                              ></Input>
                             </div>
-                          )}
-                          <Input
-                            id="avatar"
-                            type="file"
-                            onChange={inputer}
-                            onClick={() => {
-                              seterrorMessage("");
-                            }}
-                          ></Input>
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <DialogClose asChild>
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              seterrorMessage("");
-                              setavatar([]);
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                        </DialogClose>
-                        <div>
-                          <Button onClick={avatarChanger}>
-                            {isLoading ? <>Saving...</> : <>Save</>}
-                          </Button>
-                        </div>
-                      </DialogFooter>
-                    </DialogContent>
-                  </form>
-                </Dialog>
+                          </div>
+                          <DialogFooter>
+                            <DialogClose asChild>
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  seterrorMessage("");
+                                  setavatar([]);
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                            </DialogClose>
+                            <div>
+                              <Button onClick={avatarChanger}>
+                                {isLoading ? <>Saving...</> : <>Save</>}
+                              </Button>
+                            </div>
+                          </DialogFooter>
+                        </DialogContent>
+                      </form>
+                    </Dialog>
 
-                <div>
-                  <div className="text-lg font-semibold">
-                    {userinfo.username}
+                    <div>
+                      <div className="text-lg font-semibold">
+                        {userinfo.username}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        u/{userinfo.username}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    u/{userinfo.username}
-                  </div>
+                )}
+                <div className="flex flex-row  w-[70%] h-16 whitespace-nowrap gap-3 overflow-x-auto">
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button 
+                      className="shrink-0 "
+                        variant={
+                          currentValue !== "likes" ? "default" : "outline"
+                        }
+                        onClick={() => {
+                          setcurrentValue("likes");
+                        }}
+                        disabled={currentValue === "likes" ? true : false}
+                      >
+                        Upvoted
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Posts liked</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                      className="shrink-0"
+                        variant={
+                          currentValue !== "dislikes" ? "default" : "outline"
+                        }
+                        disabled={currentValue === "dislikes" ? true : false}
+                        onClick={() => {
+                          setcurrentValue("dislikes");
+                        }}
+                      >
+                        DownVoted
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Posts disliked</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button 
+                      className="shrink-0 "
+                        variant={
+                          currentValue !== "bookmark" ? "default" : "outline"
+                        }
+                        disabled={currentValue === "bookmark" ? true : false}
+                        onClick={() => {
+                          setcurrentValue("bookmark");
+                        }}
+                      >
+                        BookMarked
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Posts bookmarked</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                       className="shrink-0 "
+                        variant={
+                          currentValue !== "posts" ? "default" : "outline"
+                        }
+                        disabled={currentValue === "posts" ? true : false}
+                        onClick={() => {
+                          setcurrentValue("posts");
+                        }}
+                      >
+                        Posts
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Posts created by you</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <div className="h-dvh overflow-y-auto">
+                  {currentDivs.length !== 0 ? (
+                    currentDivs.map((ele) => {
+                      return ele;
+                    })
+                  ) : (
+                    <div>
+                      <Card>
+                        <CardContent>No content available</CardContent>
+                      </Card>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-            <div className="flex flex-wrap gap-4">
-              <Tooltip>
-                <TooltipTrigger>
-                  {" "}
-                  <Button
-                    variant={currentValue !== "likes" ? "default" : "outline"}
-                    onClick={() => {
-                      setcurrentValue("likes");
-                    }}
-                    disabled={currentValue === "likes" ? true : false}
-                  >
-                    Upvoted
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Posts liked</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger>
-                  {" "}
-                  <Button
-                    variant={
-                      currentValue !== "dislikes" ? "default" : "outline"
-                    }
-                    disabled={currentValue === "dislikes" ? true : false}
-                    onClick={() => {
-                      setcurrentValue("dislikes");
-                    }}
-                  >
-                    DownVoted
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Posts disliked</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger>
-                  {" "}
-                  <Button
-                    variant={
-                      currentValue !== "bookmark" ? "default" : "outline"
-                    }
-                    disabled={currentValue === "bookmark" ? true : false}
-                    onClick={() => {
-                      setcurrentValue("bookmark");
-                    }}
-                  >
-                    BookMarked
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Posts bookmarked</p>
-                </TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    variant={currentValue !== "posts" ? "default" : "outline"}
-                    disabled={currentValue === "posts" ? true : false}
-                    onClick={() => {
-                      setcurrentValue("posts");
-                    }}
-                  >
-                    Posts
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Posts created by you</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <div>
-              {currentDivs.length !== 0 ? (
-                currentDivs.map((ele) => {
-                  return ele;
-                })
-              ) : (
-                <div>
-                  <Card>
-                    <CardContent>No content available</CardContent>
-                  </Card>
-                </div>
-              )}
-            </div>
-          </div>
+            </>
+          ) : (
+            <NotLoggedIn></NotLoggedIn>
+          )}
         </div>
       </div>
     </>

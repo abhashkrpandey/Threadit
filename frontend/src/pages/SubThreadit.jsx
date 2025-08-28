@@ -40,7 +40,7 @@ export default function SubThreadit() {
 
       <div className="flex flex-1 overflow-y-hidden">
           <Left />
-        <div className="flex-1 overflow-y-auto bg-white">
+        <div className="flex-1 overflow-y-auto ">
           {isValid ? (
             <SubThreaditContent />
           ) : (

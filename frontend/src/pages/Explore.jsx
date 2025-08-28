@@ -34,7 +34,7 @@ export default function Explore() {
       </div>
       <div className="flex flex-row">
         <Left />
-        <div className="flex flex-col ml-50 w-[70%]">
+        <div className="flex flex-col ml-10 w-[70%]">
           <div className="text-3xl font-bold">Explore Communities</div>
           <div className="grid grid-cols-3 mt-10">
             {

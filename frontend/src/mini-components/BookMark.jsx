@@ -31,7 +31,7 @@ export default function BookMark({ bookmarkCount, hasbookmarked, postid }) {
       <Button
         variant={"outline"}
         onClick={bookmarkFunc}
-        className={"hover:bg-gray-300"}
+        className={"hover:bg-gray-300 dark:border-gray-500"}
       >
         {hasBookmarked ? (
           <Bookmark className="fill-orange-500" />

@@ -299,7 +299,7 @@ export default function CreatePostContent() {
         {validImage == 0 ? (
           <>
             <Button className="bg-gray-300 rounded-sm w-[50vw] h-[20vh] text-gray-400 hover:bg-gray-300">
-              <Label className="flex flex-row">
+              <Label className="flex flex-row flex-wrap">
                 Upload a image here under 5 MB
                 <Button onClick={triggerfunc} className="rounded-full outline">
                   <ImageUp></ImageUp>

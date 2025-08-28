@@ -10,6 +10,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +29,7 @@ export default function Navbar() {
   const userinfo = useSelector((state) => state.login.userinfo);
   const [isLoggedIn, setisLoggedIn] = useState(false);
   const [username, setusername] = useState("");
-  const [useravatar,setuseravatar] =useState(null);
+  const [useravatar, setuseravatar] = useState(null);
   useEffect(() => {
     setisLoggedIn(userinfo.isLoggedIn);
     setusername(userinfo.username);
@@ -44,32 +45,24 @@ export default function Navbar() {
   function userProfileOpen() {
     navigate(`/u/${username}`);
   }
-  // async function logoutFunc() {
-  //   const response =await axios.post(import.meta.env.VITE_BACKEND_URL+"/logout",{
-  //     headers: {
-  //           Authorization: `Bearer ${localStorage.getItem("jwttoken")}`,
-  //         }
-  //   });
-  //   if(response.data.message==='Logged out')
-  //   {
-  //      dispatch(
-  //     updateUserInfo({
-  //       username: null,
-  //       isLoggedIn: false,
-  //       userid: null,
-  //       useravatar:null,
-  //       userJoinedCommunities: [],
-  //     })
-  //   );
-  //   window.location.reload();
-  //   }
-  // }
+  function themechanger(isDark) {
+    if (isDark) {
+      localStorage.setItem("theme", "dark");
+      let element=document.querySelector("html");
+      element.classList.remove("light");
+      element.classList.add("dark");
+    } else {
+      localStorage.setItem("theme", "light");
+      let element=document.querySelector("html");
+      element.classList.remove("dark");
+      element.classList.add("light");
+    }
+  }
   return (
     <>
       <div className="flex flex-row justify-between gap-2  border-gray-300 border-b-2 ">
         <Tooltip>
           <TooltipTrigger>
-            {" "}
             <Button
               onClick={() => {
                 navigate("/");
@@ -86,21 +79,28 @@ export default function Navbar() {
           </TooltipContent>
         </Tooltip>
         <div className="flex flex-row pt-2">
+          <div className="p-3">
+            <Switch
+              defaultChecked={
+                localStorage.getItem("theme") === "dark" ? true : false
+              }
+              onCheckedChange={themechanger}
+            ></Switch>
+          </div>
           <div className="p-2">
             {isLoggedIn ? (
               <div>
-                 <Tooltip>
-                    <TooltipTrigger> 
-                        <Button onClick={createfunc} variant="default">
-                  <Plus />
-                  Create
-                </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Create post</p>
-                    </TooltipContent>
-                  </Tooltip>
-              
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button onClick={createfunc} variant="default">
+                      <Plus />
+                      Create
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Create post</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             ) : (
               <div></div>
@@ -110,7 +110,14 @@ export default function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar>
-                  <AvatarImage alt={"profile image"} src={useravatar===null?"https://github.com/shadcn.png":useravatar} />
+                  <AvatarImage
+                    alt={"profile image"}
+                    src={
+                      useravatar === null
+                        ? "https://github.com/shadcn.png"
+                        : useravatar
+                    }
+                  />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
@@ -120,28 +127,14 @@ export default function Navbar() {
                 <DropdownMenuItem onClick={userProfileOpen}>
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Tooltip>
-                    <TooltipTrigger> Dark Mode</TooltipTrigger>
-                    <TooltipContent>
-                      <p>Not functional yet</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </DropdownMenuItem>
-                {/* <DropdownMenuItem>
-                  <Tooltip>
-                    <TooltipTrigger> Edit Avatar</TooltipTrigger>
-                    <TooltipContent>
-                      <p>Not functional yet</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </DropdownMenuItem> */}
-                <DropdownMenuItem onClick={()=>
-                  {
-                    localStorage.removeItem("jwttoken")
+                <DropdownMenuItem
+                  onClick={() => {
+                    localStorage.removeItem("jwttoken");
                     window.location.reload();
-                  }
-                }>LogOut</DropdownMenuItem>
+                  }}
+                >
+                  LogOut
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (

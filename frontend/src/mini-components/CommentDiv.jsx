@@ -105,17 +105,17 @@ export default function CommentDiv({ postid }) {
   return (
     <>
       <div className="flex flex-row">
-        <div className=" flex flex-col w-[100%]">
+        <div className=" flex flex-col w-[60%]">
           <Textarea
             id="commentArea"
             placeholder="Join Conversation"
             onChange={inputter}
           ></Textarea>
           <div className="flex flex-row-reverse gap-0.5">
-            <Button className="bg-blue-600" onClick={addCommentSocket}>
+            <Button className="bg-blue-600 w-[65px] " onClick={addCommentSocket}>
               Comment
             </Button>
-            <Button className="bg-blue-600" onClick={clearText}>
+            <Button className="bg-blue-600 w-[50px] " onClick={clearText}>
               Cancel
             </Button>
           </div>

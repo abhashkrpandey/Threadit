@@ -67,12 +67,12 @@ export default function LikeDisLikeButton(props) {
       <Button
         variant={"outline"}
         onClick={likeFunc}
-        className={"hover:bg-gray-300"}
+        className={"hover:bg-gray-300 dark:border-gray-500"}
       >
         {hasLiked ? <ThumbsUp className="fill-orange-500" /> : <ThumbsUp />}
         {upvoteLive}
       </Button>
-      <Button variant={"outline"} onClick={dislikeFunc} className={"hover:bg-gray-300"}>
+      <Button variant={"outline"} onClick={dislikeFunc} className={"hover:bg-gray-300 dark:border-gray-500"}>
         {hasdisLiked ? (
           <ThumbsDown className="fill-orange-500" />
         ) : (

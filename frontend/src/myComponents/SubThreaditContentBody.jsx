@@ -100,13 +100,13 @@ export default function SubThreaditContentBody() {
     <div className="flex flex-col h-full">
       {/* Top Buttons */}
       <div className="flex justify-end gap-2 mb-4">
-        <Button onClick={() => navigate("/create")} variant="ghost">
+        <Button onClick={() => navigate("/create")} variant="default">
           <Plus className="mr-1" /> Create Post
         </Button>
         <Button
           onClick={joinGroup}
-          variant="ghost"
-          className={hasJoined ? "border text-black" : "bg-blue-500 text-white"}
+          variant="default"
+          className={hasJoined ? "" : "bg-blue-500 text-white"}
         >
           {hasJoined ? "Joined" : "Join"}
         </Button>
@@ -156,8 +156,10 @@ export default function SubThreaditContentBody() {
                     )}
                     {currentPage > 1 && <PaginationEllipsis />}
                     <PaginationItem>
-                      <PaginationLink className="bg-gray-200">
+                      <PaginationLink >
+                        <Button>
                         {currentPage}
+                        </Button>
                       </PaginationLink>
                     </PaginationItem>
                     {totalPages - currentPage >= 1 && <PaginationEllipsis />}
@@ -174,8 +176,8 @@ export default function SubThreaditContentBody() {
         </div>
 
         
-        <ScrollArea className="w-64 shrink-0 rounded border p-4 text-gray-600">
-          <div className="font-bold text-black mb-2">
+        <ScrollArea className="w-64  rounded border p-4 text-gray-600">
+          <div className="font-bold text-black dark:text-gray-600 mb-2">
             This is {SubThreaditDetails.subname} community
           </div>
           <div className="mb-2">{SubThreaditDetails.subdescription}</div>

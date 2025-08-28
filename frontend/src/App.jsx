@@ -80,6 +80,16 @@ export default function App() {
       }
     };
   }, [isLoggedIn]);
+  useEffect(()=>
+  {
+      if(localStorage.getItem("theme")==="dark")
+      {
+        document.querySelector("html").classList.add("dark");
+      }
+      else{
+        document.querySelector("html").classList.add("light");
+      }
+  },[])
   return (
     <Routes>
       <Route path="/" element={<Home></Home>}></Route>
